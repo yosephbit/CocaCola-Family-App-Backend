@@ -1,0 +1,7 @@
+{
+    "rules":{
+        "users":{
+            ".indexOn":["phone_number"]
+        }
+    }
+}
