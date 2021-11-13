@@ -22,7 +22,16 @@ exports.signUp =users.signUpUsers;
 
 exports.generateInviteLink = users.generateInviteLink;
 
-exports.onInvitationLink =users.onInvation;
+exports.onInvitationLink = users.onInvitation;
+
+exports.addFamily = users.addFamily;
 
 //question related
-exports.addQuestion =questions.addQuestion; 
+exports.addQuestion = questions.addQuestion; 
+
+exports.addChoiceToQuestion = questions.addChoiceToQuestion;
+
+exports.answerQuestion = questions.addAnswers;
+
+exports.getQuiz = questions.getQuiz;
+

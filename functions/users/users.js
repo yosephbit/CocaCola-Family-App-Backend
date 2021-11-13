@@ -34,7 +34,7 @@ exports.signUpUsers = functions.https.onRequest(async (req, res) => {
             throw new ErrorWithDetail("Invalid Data", "phone already in use");
         }
         const db = root.ref("users");
-        var result = db.push(user).getKey();
+        var result = await db.push(user).getKey();
         handleResponse(res, { uid: result })
     } catch (err) {
         handleResponse(res, { status: "error", "msg": err.msg ? { detail: err.message } : err }, 500);
@@ -46,7 +46,7 @@ exports.generateInviteLink = functions.https.onRequest(async (req, res) => {
         const validateSchema = () =>
             joi.object({
                 uid: joi.string().required(),
-                relation: joi.string().valid('GrandFather', 'GrandMother', 'Mother', 'Father', 'Son', 'Daugther').required(),
+                relation: joi.string().valid('GrandFather', 'GrandMother', 'Mother', 'Father', 'Son', 'Daughter').required(),
             }).required();
 
         const { uid, relation } = mustValidate(validateSchema(), req.body);
@@ -65,20 +65,19 @@ exports.generateInviteLink = functions.https.onRequest(async (req, res) => {
         };
         const linkId = nanoid(8);
         logger.log(linkId);
-        const linkInfoDB = root.ref('linkinfo');
+        const linkInfoDB = root.ref('linkInfo');
 
-        var result = linkInfoDB.child(linkId).set(linkInfo);
+        var result = await linkInfoDB.child(linkId).set(linkInfo);
 
 
 
         handleResponse(res, { linkId: linkId, to: relation })
     } catch (err) {
-        logger.log(err)
         handleResponse(res, { status: "error", "msg": err.msg ? { detail: err.message } : err }, 500);
     }
 })
 
-exports.onInvation = functions.https.onRequest(async (req, res) => {
+exports.onInvitation = functions.https.onRequest(async (req, res) => {
     try {
         const validateSchema = () =>
             joi.object({
@@ -93,7 +92,7 @@ exports.onInvation = functions.https.onRequest(async (req, res) => {
             throw new ErrorWithDetail("Invalid Uid", "user not found")
         }
 
-        const linkInfoDB = root.ref('linkinfo');
+        const linkInfoDB = root.ref('linkInfo');
         var linkInfo = await (await linkInfoDB.child(invitationId).get()).val()
         if (linkInfo === null) {
             throw new ErrorWithDetail("Invalid invitation", "Invitation not found");
@@ -108,11 +107,45 @@ exports.onInvation = functions.https.onRequest(async (req, res) => {
             invitedId: invitedId
 
         }
-        var result = linkInfoDB.child(invitationId).update(linkInfo);
+        var result = await linkInfoDB.child(invitationId).update(linkInfo);
 
-        handleResponse(res, { result: "sucessfull" })
+        handleResponse(res, { result: "successful" })
     } catch (err) {
-        logger.log(err)
+        handleResponse(res, { status: "error", "msg": err.msg ? { detail: err.message } : err }, 500);
+    }
+})
+
+
+exports.addFamily = functions.https.onRequest(async (req, res) => {
+    try {
+        const validateSchema = () =>
+            joi.object({
+                userId: joi.string().required(),
+                familyMemberId: joi.string().required(),
+                relation: joi.string().valid('GrandFather', 'GrandMother', 'Mother', 'Father', 'Son', 'Daughter').required()
+            }).required();
+
+        const { userId, familyMemberId, relation } = mustValidate(validateSchema(), req.body);
+        const usersDb = root.ref("users");
+        const familyDb = root.ref("families");
+
+        var userExists = await (await usersDb.child(userId).get()).val();
+        var familyMemberExists = await (await usersDb.child(familyMemberId).get()).val();
+
+        if (userExists === null || familyMemberExists === null) {
+            throw new ErrorWithDetail("Invalid Data", "User not found");
+        }
+
+        family = {
+            usersId: userId,
+            familyMemberId: familyMemberId,
+            relation: relation
+        }
+        var result = await familyDb.push(family).getKey();
+
+        handleResponse(res, {familyId, result});
+
+    } catch (err) {
         handleResponse(res, { status: "error", "msg": err.msg ? { detail: err.message } : err }, 500);
     }
 })
