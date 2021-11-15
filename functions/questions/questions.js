@@ -26,9 +26,9 @@ exports.addQuestion = functions.https.onRequest(async (req, res) => {
 
         const db = root.ref("questions");
         var result = db.push(question).getKey();
-        handleResponse(res, { question_id: result })
+        handleResponse(req, res, { question_id: result })
     } catch (err) {
-        handleResponse(res, { status: "error", "msg": err.msg ? { detail: err.message } : err }, 500);
+        handleResponse(req, res, { status: "error", "msg": err.msg ? { detail: err.message } : err }, 500);
     }
 });
 
@@ -55,9 +55,9 @@ exports.addChoiceToQuestion = functions.https.onRequest(async (req, res) => {
 
         var result = root.ref("questions").child(qid).child('answersId').setValue(availableAnswers.answersId)
         logger.log(result);
-        handleResponse(res, { result: result })
+        handleResponse(req, res, { result: result })
     } catch (err) {
-        handleResponse(res, { status: "error", "msg": err.msg ? { detail: err.message } : err }, 500);
+        handleResponse(req, res, { status: "error", "msg": err.msg ? { detail: err.message } : err }, 500);
     }
 
 });
@@ -104,9 +104,9 @@ exports.addAnswers = functions.https.onRequest(async (req, res) => {
         }
 
         var result = await answersDb.push(answer).getKey();
-        handleResponse(res, { answersId: result })
+        handleResponse(req, res, { answersId: result })
     } catch (err) {
-        handleResponse(res, { status: "error", "msg": err.msg ? { detail: err.message } : err }, 500);
+        handleResponse(req, res, { status: "error", "msg": err.msg ? { detail: err.message } : err }, 500);
     }
 
 
@@ -141,10 +141,10 @@ exports.getQuiz = functions.https.onRequest(async (req, res) => {
         }
         randmizedQuestions = shuffleArray(questions)
         
-        handleResponse(res, {questions:randmizedQuestions});
+        handleResponse(req,res, {questions:randmizedQuestions});
     } catch (err) {
         logger.log(err);
-        handleResponse(res, { status: "error", "msg": err.msg ? { detail: err.message } : err }, 500)
+        handleResponse(req,res, { status: "error", "msg": err.msg ? { detail: err.message } : err }, 500)
     }
 })
 

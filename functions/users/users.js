@@ -35,9 +35,9 @@ exports.signUpUsers = functions.https.onRequest(async (req, res) => {
         }
         const db = root.ref("users");
         var result = await db.push(user).getKey();
-        handleResponse(res, { uid: result })
+        handleResponse(req,res, { uid: result })
     } catch (err) {
-        handleResponse(res, { status: "error", "msg": err.msg ? { detail: err.message } : err }, 500);
+        handleResponse(req,res, { status: "error", "msg": err.msg ? { detail: err.message } : err }, 500);
     }
 });
 
@@ -71,9 +71,9 @@ exports.generateInviteLink = functions.https.onRequest(async (req, res) => {
 
 
 
-        handleResponse(res, { linkId: linkId, to: relation })
+        handleResponse(req,res, { linkId: linkId, to: relation })
     } catch (err) {
-        handleResponse(res, { status: "error", "msg": err.msg ? { detail: err.message } : err }, 500);
+        handleResponse(req,res, { status: "error", "msg": err.msg ? { detail: err.message } : err }, 500);
     }
 })
 
@@ -109,9 +109,9 @@ exports.onInvitation = functions.https.onRequest(async (req, res) => {
         }
         var result = await linkInfoDB.child(invitationId).update(linkInfo);
 
-        handleResponse(res, { result: "successful" })
+        handleResponse(req,res, { result: "successful" })
     } catch (err) {
-        handleResponse(res, { status: "error", "msg": err.msg ? { detail: err.message } : err }, 500);
+        handleResponse(req,res, { status: "error", "msg": err.msg ? { detail: err.message } : err }, 500);
     }
 })
 
@@ -143,9 +143,9 @@ exports.addFamily = functions.https.onRequest(async (req, res) => {
         }
         var result = await familyDb.push(family).getKey();
 
-        handleResponse(res, {familyId, result});
+        handleResponse(req,res, {familyId, result});
 
     } catch (err) {
-        handleResponse(res, { status: "error", "msg": err.msg ? { detail: err.message } : err }, 500);
+        handleResponse(req,res, { status: "error", "msg": err.msg ? { detail: err.message } : err }, 500);
     }
 })
