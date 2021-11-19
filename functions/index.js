@@ -26,6 +26,7 @@ exports.onInvitationLink = users.onInvitation;
 
 exports.addFamily = users.addFamily;
 
+exports.getInviteDetails = users.getInviteLinkDetails;
 //question related
 exports.addQuestion = questions.addQuestion; 
 

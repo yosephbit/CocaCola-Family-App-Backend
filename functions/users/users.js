@@ -71,10 +71,41 @@ exports.generateInviteLink = functions.https.onRequest(async (req, res) => {
 
 
 
-        handleResponse(req,res, { linkId: linkId, to: relation })
+        handleResponse(req,res, { linkId: linkId, to: relation, from: doesUserExist.name })
     } catch (err) {
         handleResponse(req,res, { status: "error", "msg": err.msg ? { detail: err.message } : err }, 500);
     }
+})
+exports.getInviteLinkDetails= functions.https.onRequest(async (req, res) => {
+   try{
+       
+    const validateSchema = () =>
+            joi.object({
+                invitationId: joi.string().required()
+            }).required();
+
+        const { invitationId } = mustValidate(validateSchema(), req.body);
+
+
+
+        const linkInfoDB = root.ref('linkInfo');
+
+        var result = await (await linkInfoDB.child(invitationId).get()).val();
+
+        const usersDb = root.ref("users");
+        var doesUserExist = await (await usersDb.child(result.inviterId).get()).val();
+        
+        if (doesUserExist === null) {
+            throw new ErrorWithDetail("Invalid Uid", "user not found")
+        }
+
+
+        handleResponse(req,res, {  from: doesUserExist.name })
+    } catch (err) {
+        logger.log(err)
+        handleResponse(req,res, { status: "error", "msg": err.msg ? { detail: err.message } : err }, 500);
+    }
+
 })
 
 exports.onInvitation = functions.https.onRequest(async (req, res) => {
