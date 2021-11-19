@@ -10,6 +10,7 @@ const root = admin.database();
 const logger = require('./utils/Logger');
 const users = require('./users/users');
 const questions = require('./questions/questions');
+const challenges = require('./challenges/challenges');
 
 exports.helloWorld = functions.https.onRequest((request, response) => {
   logger.log("asd")
@@ -35,4 +36,8 @@ exports.addChoiceToQuestion = questions.addChoiceToQuestion;
 exports.answerQuestion = questions.addAnswers;
 
 exports.getQuiz = questions.getQuiz;
+
+//challange related 
+
+exports.addChallange = challenges.addChallange; 
 

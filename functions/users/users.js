@@ -137,7 +137,7 @@ exports.onInvitation = functions.https.onRequest(async (req, res) => {
             isUsed: true,
             invitedId: invitedId
 
-        }
+        }   
         var result = await linkInfoDB.child(invitationId).update(linkInfo);
 
         handleResponse(req,res, { result: "successful" })
