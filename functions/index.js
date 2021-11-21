@@ -36,8 +36,11 @@ exports.addChoiceToQuestion = questions.addChoiceToQuestion;
 exports.answerQuestion = questions.addAnswers;
 
 exports.getQuiz = questions.getQuiz;
+exports.getScore = questions.getScore;
 
 //challange related 
 
 exports.addChallange = challenges.addChallange; 
+
+exports.getChalllenge = challenges.getChalllenge;
 

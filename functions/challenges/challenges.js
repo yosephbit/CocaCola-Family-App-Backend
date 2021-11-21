@@ -27,17 +27,17 @@ exports.addChallange = functions.https.onRequest(async (req, res) => {
         };
 
         const usersDb = root.ref("users");
-        const questionDb = root.ref("question");
-        const questionChoiceDB = root.ref("questionChoice");
+        const questionDb = root.ref("questions");
+        const questionChoiceDB = root.ref("questionsChoice");
 
         var userExists = await (await usersDb.child(challengerId).get()).val();
         var questionExists = await (await questionDb.child(questionId).get()).val();
         var questionChoiceExists = await (await questionChoiceDB.child(answerId).get()).val();
-
+       
         if (userExists === null) {
             throw new ErrorWithDetail("Invalid Data", "User Id not found");
         }
-        
+
         if (questionExists === null) {
             throw new ErrorWithDetail("Invalid Data", "Questions Id not found")
         }
@@ -47,9 +47,39 @@ exports.addChallange = functions.https.onRequest(async (req, res) => {
 
         const db = root.ref("challanges");
         var result = db.push(challange).getKey();
-        handleResponse(req, res, { challange_id: result })
+        handleResponse(req, res, { challange_id: "Challange added successfully" })
     } catch (err) {
         handleResponse(req, res, { status: "error", "msg": err.msg ? { detail: err.message } : err }, 500);
     }
 
 })
+
+exports.getChalllenge = functions.https.onRequest(async (req, res) => {
+    try {
+        const validateSchema = () =>
+            joi.object({
+                challengerId: joi.string().required(), 
+                numberOfQuestions: joi.number().required()
+            }).required()
+
+        const { challengerId, numberOfQuestions } = mustValidate(validateSchema(), req.body);
+        const challengerDb = root.ref("challanges");
+        var questions =
+        await challengerDb.orderByChild("challengerId").equalTo(challengerId).once("value", snapshot => {
+            if (snapshot.exists()) {
+                questions = snapshot.val();
+            }else{
+                throw new ErrorWithDetail("Invalid Data", "Challanger Id not found in challange")
+                return
+            }
+        });
+       // questions = Object.entries(questions)
+        
+        handleResponse(req, res, { questions: questions });
+    } catch (err) {
+        logger.log(err);
+        handleResponse(req, res, { status: "error", "msg": err.msg ? { detail: err.message } : err }, 500)
+    }
+})
+
+

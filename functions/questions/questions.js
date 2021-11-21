@@ -47,16 +47,34 @@ exports.addChoiceToQuestion = functions.https.onRequest(async (req, res) => {
         var choiceID = db.push(answer).getKey();
 
 
-        var availableAnswers = {
-            answersId: {
-                choiceID
+
+
+        const questionDb = root.ref("questions")
+        var question = await (await questionDb.child(qid).get()).val();
+        if (question === null) {
+            throw new ErrorWithDetail(`Invalid Data". "Question Id not found"`);
+        }
+        if (question.answersId === undefined) {
+            var availableAnswers = {
+                questionText: question.questionText,
+                answersId: {
+                    choiceID1: choiceID
+                }
+            }
+        } else {
+            var availableAnswers = {
+                questionText: question.questionText,
+                answersId: {
+                    choiceID1: question.answersId.choiceID1,
+                    choiceID2: choiceID
+                }
             }
         }
+        var result = await root.ref("questions").child(qid).set(availableAnswers)
 
-        var result = root.ref("questions").child(qid).child('answersId').setValue(availableAnswers.answersId)
-        logger.log(result);
-        handleResponse(req, res, { result: result })
+        handleResponse(req, res, { result: "successfully added answers" });
     } catch (err) {
+        logger.log(err);
         handleResponse(req, res, { status: "error", "msg": err.msg ? { detail: err.message } : err }, 500);
     }
 
@@ -74,8 +92,8 @@ exports.addAnswers = functions.https.onRequest(async (req, res) => {
         const { respondentId: respondentId, subjectId, questionId, questionChoiceId } = mustValidate(validateSchema(), req.body);
 
         const usersDb = root.ref("users");
-        const questionDb = root.ref("question");
-        const questionChoiceDB = root.ref("questionChoice");
+        const questionDb = root.ref("questions");
+        const questionChoiceDB = root.ref("questionsChoice");
         const answersDb = root.ref("answers");
 
         var respondentExists = await (await usersDb.child(respondentId).get()).val();
@@ -114,10 +132,64 @@ exports.addAnswers = functions.https.onRequest(async (req, res) => {
 
 exports.getScore = functions.https.onRequest(async (req, res, next) => {
     try {
-        //TODO
+        const validateSchema = () =>
+            joi.object({
+                respondentId: joi.string().required(),
+                subjectId: joi.string().required()
+            }).required()
+        const { respondentId, subjectId } = mustValidate(validateSchema(), req.body);
 
+        const usersDb = root.ref("users");
+        const challengesDb = root.ref("challanges");
+        const answersDb = root.ref("answers");
+
+        var respondantExists = await (await usersDb.child(respondentId).get()).val();
+        var subjectExists = await (await usersDb.child(subjectId).get()).val();
+
+        if (respondantExists === null) {
+            throw new ErrorWithDetail("Invalid Data", "respondantId not found")
+        }
+        if (subjectExists === null) {
+            throw new ErrorWithDetail("Invalid Data", "subjectId not found");
+        }
+        var responses;
+        await answersDb.orderByChild("respondentId").equalTo(respondentId).once("value", snapshot => {
+            if (snapshot.exists()) {
+                responses = snapshot.val();
+            }else{
+                throw new ErrorWithDetail("Invalid Data", "Challanger Id not found in challange")
+            
+            }
+        });
+        responses =Object.entries(responses);
+        responses=responses.filter(filterAnswersBySubjectIdHelper.bind(this, subjectId));
+
+        var subjectsAnswers;
+        await challengesDb.orderByChild("challengerId").equalTo(subjectId).once("value", snapshot => {
+            if (snapshot.exists()) {
+                subjectsAnswers = snapshot.val();
+            }else{
+                throw new ErrorWithDetail("Invalid Data", "Challanger Id not found in challange")
+                
+            }
+        });
+
+        //needs more nauance here 
+        var score=0;
+        subjectsAnswers=Object.entries(subjectsAnswers);
+        responses.forEach(singleResponse => {
+            var result=subjectsAnswers.find(findAnswersByQuestionId.bind(this, singleResponse));
+            if(result!=undefined) {
+               if( result[1].answerId===singleResponse[1].questionChoiceId ){
+                    score++;
+               }
+            }
+        });
+        //calculate Percentage 
+        var percentage=(score/responses.length)* 100;
+        handleResponse(req, res, {"net score": score, "percentage": percentage});
     } catch (err) {
-        handleResponse(res, { status: "error", "msg": err.msg ? { detail: err.message } : err }, 500)
+        handleResponse(req, res, { status: "error", "msg": err.msg ? { detail: err.message } : err }, 500)
     }
 })
 
@@ -130,31 +202,39 @@ exports.getQuiz = functions.https.onRequest(async (req, res) => {
 
         const { numberOfQuestions } = mustValidate(validateSchema(), req.body);
         const questionsDb = root.ref("questions");
-        
+
         var questions = await (await questionsDb.orderByKey().get()).val();
         questions = Object.entries(questions)
 
         logger.log(questions.length)
         //questions=JSON.stringify(questions);
-        if (questions.length < numberOfQuestions){
+        if (questions.length < numberOfQuestions) {
             throw new ErrorWithDetail("Invalid Data", "Number of questions is too high")
         }
         randmizedQuestions = shuffleArray(questions)
-        
-        handleResponse(req,res, {questions:randmizedQuestions});
+
+        handleResponse(req, res, { questions: randmizedQuestions });
     } catch (err) {
-        logger.log(err);
-        handleResponse(req,res, { status: "error", "msg": err.msg ? { detail: err.message } : err }, 500)
+        handleResponse(req, res, { status: "error", "msg": err.msg ? { detail: err.message } : err }, 500)
     }
 })
 
 function shuffleArray(array) {
-   
-        for (let i = array.length - 1; i > 0; i--) {
-          const j = Math.floor(Math.random() * (i + 1));
-          const temp = array[i];
-          array[i] = array[j];
-          array[j] = temp;
-        }
-        return array;
+
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        const temp = array[i];
+        array[i] = array[j];
+        array[j] = temp;
+    }
+    return array;
+}
+function filterAnswersBySubjectIdHelper(subjectId,answer) {
+
+    return answer[1].subjectId===subjectId;
+    
+}
+function findAnswersByQuestionId(element, singleResponse) {
+
+    return element[1].questionId===singleResponse[1].questionId;
 }
