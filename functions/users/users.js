@@ -11,35 +11,6 @@ const { mustValidate } = require("../utils/validation");
 const handleResponse = require("../utils/handleResponse");
 const ErrorWithDetail = require("../utils/ErrorWithDetail");
 
-exports.signUpUsers = functions.https.onRequest(async (req, res) => {
-    try {
-        const validateSchema = () =>
-            joi.object({
-                name: joi.string().required(),
-                phone_number: joi.string().min(10).pattern(/^[0-9]+$/).required(),
-            }).required();
-        const { name, phone_number } = mustValidate(validateSchema(), req.body);
-        var user = {
-            name: name,
-            phone_number: phone_number
-        };
-        var phone_inuse = false;
-        await root.ref("users").orderByChild("phone_number").equalTo(phone_number).once("value", snapshot => {
-            if (snapshot.exists()) {
-                phone_inuse = true;
-                return
-            }
-        })
-        if (phone_inuse === true) {
-            throw new ErrorWithDetail("Invalid Data", "phone already in use");
-        }
-        const db = root.ref("users");
-        var result = await db.push(user).getKey();
-        handleResponse(req,res, { uid: result })
-    } catch (err) {
-        handleResponse(req,res, { status: "error", "msg": err.msg ? { detail: err.message } : err }, 500);
-    }
-});
 
 exports.generateInviteLink = functions.https.onRequest(async (req, res) => {
     try {

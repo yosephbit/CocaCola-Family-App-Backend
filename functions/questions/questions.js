@@ -84,28 +84,26 @@ exports.addAnswers = functions.https.onRequest(async (req, res) => {
     try {
         const validateSchema = () =>
             joi.object({
+                challangeId: joi.string().required(),
                 respondentId: joi.string().required(),
-                subjectId: joi.string().required(),
                 questionId: joi.string().required(),
                 questionChoiceId: joi.string().required()
             }).required();
-        const { respondentId: respondentId, subjectId, questionId, questionChoiceId } = mustValidate(validateSchema(), req.body);
+        const { challangeId, respondentId, subjectId, questionId, questionChoiceId } = mustValidate(validateSchema(), req.body);
 
         const usersDb = root.ref("users");
         const questionDb = root.ref("questions");
         const questionChoiceDB = root.ref("questionsChoice");
         const answersDb = root.ref("answers");
+        const challangeInstanceDb = root.ref("challengeInstanceDb");
 
+        var challangeInstanceExists =await (await challangeInstanceDb.child(challangeId).get()).val();
         var respondentExists = await (await usersDb.child(respondentId).get()).val();
-        var subjectExists = await (await usersDb.child(subjectId).get()).val();
         var questionExists = await (await questionDb.child(questionId).get()).val();
         var questionChoiceExists = await (await questionChoiceDB.child(questionChoiceId).get()).val();
 
         if (respondentExists === null) {
             throw new ErrorWithDetail("Invalid Data", "Respondent Id not found");
-        }
-        if (subjectExists === null) {
-            throw new ErrorWithDetail("Invalid Data", "Subject Id not found")
         }
         if (questionExists === null) {
             throw new ErrorWithDetail("Invalid Data", "Questions Id not found")
@@ -113,17 +111,21 @@ exports.addAnswers = functions.https.onRequest(async (req, res) => {
         if (questionChoiceExists === null) {
             throw new ErrorWithDetail("Invalid Data", "Questions Choice Id not found")
         }
+        if(challangeInstanceExists === null) {
+            throw new ErrorWithDetail("Invalid Data", "Challange instance Id not found")
+        }
 
         answer = {
+            challangeId: challangeId,
             respondentId: respondentId,
-            subjectId: subjectId,
             questionId: questionId,
             questionChoiceId: questionChoiceId
         }
 
         var result = await answersDb.push(answer).getKey();
-        handleResponse(req, res, { answersId: result })
+        handleResponse(req, res, { answersId: "Answer to question added successfully" })
     } catch (err) {
+        logger.log(err);
         handleResponse(req, res, { status: "error", "msg": err.msg ? { detail: err.message } : err }, 500);
     }
 
@@ -134,38 +136,35 @@ exports.getScore = functions.https.onRequest(async (req, res, next) => {
     try {
         const validateSchema = () =>
             joi.object({
-                respondentId: joi.string().required(),
-                subjectId: joi.string().required()
+                challangeId: joi.string().required(),
+                respondentId: joi.string().required()
             }).required()
-        const { respondentId, subjectId } = mustValidate(validateSchema(), req.body);
+        const { respondentId, challangeId } = mustValidate(validateSchema(), req.body);
 
         const usersDb = root.ref("users");
         const challengesDb = root.ref("challanges");
         const answersDb = root.ref("answers");
 
         var respondantExists = await (await usersDb.child(respondentId).get()).val();
-        var subjectExists = await (await usersDb.child(subjectId).get()).val();
-
+    
         if (respondantExists === null) {
             throw new ErrorWithDetail("Invalid Data", "respondantId not found")
         }
-        if (subjectExists === null) {
-            throw new ErrorWithDetail("Invalid Data", "subjectId not found");
-        }
+        
         var responses;
-        await answersDb.orderByChild("respondentId").equalTo(respondentId).once("value", snapshot => {
+        await answersDb.orderByChild("challangeId").equalTo(challangeId).once("value", snapshot => {
             if (snapshot.exists()) {
                 responses = snapshot.val();
             }else{
-                throw new ErrorWithDetail("Invalid Data", "Challanger Id not found in challange")
+                throw new ErrorWithDetail("Invalid Data", "Challanger dsds Id not found in challange")
             
             }
         });
         responses =Object.entries(responses);
-        responses=responses.filter(filterAnswersBySubjectIdHelper.bind(this, subjectId));
+        //responses=responses.filter(filterAnswersBySubjectIdHelper.bind(this, subjectId));
 
         var subjectsAnswers;
-        await challengesDb.orderByChild("challengerId").equalTo(subjectId).once("value", snapshot => {
+        await challengesDb.orderByChild("challangeInstanceId").equalTo(challangeId).once("value", snapshot => {
             if (snapshot.exists()) {
                 subjectsAnswers = snapshot.val();
             }else{
@@ -189,6 +188,7 @@ exports.getScore = functions.https.onRequest(async (req, res, next) => {
         var percentage=(score/responses.length)* 100;
         handleResponse(req, res, {"net score": score, "percentage": percentage});
     } catch (err) {
+        logger.log(err);
         handleResponse(req, res, { status: "error", "msg": err.msg ? { detail: err.message } : err }, 500)
     }
 })
@@ -219,6 +219,30 @@ exports.getQuiz = functions.https.onRequest(async (req, res) => {
     }
 })
 
+exports.getSingleQuestion = functions.https.onRequest(async (req, res)=>{
+    try {
+        const validateSchema = () =>
+            joi.object({
+                questionId: joi.string().required()
+            }).required();
+        const {questionId}=mustValidate(validateSchema(), req.body);
+
+        const questionsDb = root.ref("questions");
+
+        var questionExists = await (await questionsDb.child(questionId).get()).val();
+        if(questionExists === null){
+            throw new ErrorWithDetail("Invalid Data", "Question Id not found");
+        }
+        //only for pretty json
+        var question=questionExists;
+        handleResponse(req, res, {question});
+        
+    } catch (err) {
+        logger.log(err);
+        handleResponse(req, res, { status: "error", "msg": err.msg ? { detail: err.message } : err },)
+        
+    }
+})
 function shuffleArray(array) {
 
     for (let i = array.length - 1; i > 0; i--) {

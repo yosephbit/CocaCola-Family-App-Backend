@@ -11,6 +11,7 @@ const logger = require('./utils/Logger');
 const users = require('./users/users');
 const questions = require('./questions/questions');
 const challenges = require('./challenges/challenges');
+const auth = require('./auth/auth');
 
 exports.helloWorld = functions.https.onRequest((request, response) => {
   logger.log("asd")
@@ -19,7 +20,7 @@ exports.helloWorld = functions.https.onRequest((request, response) => {
 
 
 ///user related
-exports.signUp =users.signUpUsers;
+
 
 exports.generateInviteLink = users.generateInviteLink;
 
@@ -28,15 +29,21 @@ exports.onInvitationLink = users.onInvitation;
 exports.addFamily = users.addFamily;
 
 exports.getInviteDetails = users.getInviteLinkDetails;
+
 //question related
+
 exports.addQuestion = questions.addQuestion; 
 
 exports.addChoiceToQuestion = questions.addChoiceToQuestion;
 
 exports.answerQuestion = questions.addAnswers;
 
+exports.getSingleQuestion = questions.getSingleQuestion;
+
 exports.getQuiz = questions.getQuiz;
+
 exports.getScore = questions.getScore;
+
 
 //challange related 
 
@@ -44,3 +51,12 @@ exports.addChallange = challenges.addChallange;
 
 exports.getChalllenge = challenges.getChalllenge;
 
+exports.createChallangeInstance = challenges.createChallangeInstance;
+
+exports.onChallengeCreated= challenges.onChallengeCreated;
+
+//Authrization related
+
+exports.sendCode=auth.sendCode;
+
+exports.verifyToken=auth.verifyToken;
