@@ -9,6 +9,7 @@ const logger = require("../utils/Logger");
 const { mustValidate } = require("../utils/validation");
 const handleResponse = require("../utils/handleResponse");
 const ErrorWithDetail = require("../utils/ErrorWithDetail");
+const config = require("../utils/config");
 
 exports.addQuestion = functions.https.onRequest(async (req, res) => {
     try {
@@ -24,7 +25,7 @@ exports.addQuestion = functions.https.onRequest(async (req, res) => {
             }
         };
 
-        const db = root.ref("questions");
+        const db = config.getQuestionsDb();
         var result = db.push(question).getKey();
         handleResponse(req, res, { question_id: result })
     } catch (err) {
@@ -43,13 +44,13 @@ exports.addChoiceToQuestion = functions.https.onRequest(async (req, res) => {
         var answer = {
             answersText: answersText,
         };
-        const db = root.ref("questionsChoice");
+        const db = config.getQuestionChoicesDb();
         var choiceID = db.push(answer).getKey();
 
 
 
 
-        const questionDb = root.ref("questions")
+        const questionDb = config.getQuestionsDb()
         var question = await (await questionDb.child(qid).get()).val();
         if (question === null) {
             throw new ErrorWithDetail(`Invalid Data". "Question Id not found"`);
@@ -70,7 +71,7 @@ exports.addChoiceToQuestion = functions.https.onRequest(async (req, res) => {
                 }
             }
         }
-        var result = await root.ref("questions").child(qid).set(availableAnswers)
+        var result = await config.getQuestionsDb().child(qid).set(availableAnswers)
 
         handleResponse(req, res, { result: "successfully added answers" });
     } catch (err) {
@@ -91,11 +92,11 @@ exports.addAnswers = functions.https.onRequest(async (req, res) => {
             }).required();
         const { challangeId, respondentId, subjectId, questionId, questionChoiceId } = mustValidate(validateSchema(), req.body);
 
-        const usersDb = root.ref("users");
-        const questionDb = root.ref("questions");
-        const questionChoiceDB = root.ref("questionsChoice");
-        const answersDb = root.ref("answers");
-        const challangeInstanceDb = root.ref("challengeInstanceDb");
+        const usersDb = config.getUsersDb();
+        const questionDb = config.getQuestionsDb();
+        const questionChoiceDB =config.getQuestionChoicesDb();
+        const answersDb = config.getAnswersDb();
+        const challangeInstanceDb = config.getChallengeInstancesDb();
 
         var challangeInstanceExists =await (await challangeInstanceDb.child(challangeId).get()).val();
         var respondentExists = await (await usersDb.child(respondentId).get()).val();
@@ -141,9 +142,9 @@ exports.getScore = functions.https.onRequest(async (req, res, next) => {
             }).required()
         const { respondentId, challangeId } = mustValidate(validateSchema(), req.body);
 
-        const usersDb = root.ref("users");
-        const challengesDb = root.ref("challanges");
-        const answersDb = root.ref("answers");
+        const usersDb = config.getUsersDb();
+        const challengesDb = config.getChalllengesDb();
+        const answersDb = config.getAnswersDb();
 
         var respondantExists = await (await usersDb.child(respondentId).get()).val();
     
@@ -201,7 +202,7 @@ exports.getQuiz = functions.https.onRequest(async (req, res) => {
             }).required()
 
         const { numberOfQuestions } = mustValidate(validateSchema(), req.body);
-        const questionsDb = root.ref("questions");
+        const questionsDb = config.getQuestionsDb();
 
         var questions = await (await questionsDb.orderByKey().get()).val();
         questions = Object.entries(questions)
@@ -227,7 +228,7 @@ exports.getSingleQuestion = functions.https.onRequest(async (req, res)=>{
             }).required();
         const {questionId}=mustValidate(validateSchema(), req.body);
 
-        const questionsDb = root.ref("questions");
+        const questionsDb = config.getQuestionsDb();
 
         var questionExists = await (await questionsDb.child(questionId).get()).val();
         if(questionExists === null){

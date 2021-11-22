@@ -11,7 +11,7 @@ const { mustValidate } = require("../utils/validation");
 const handleResponse = require("../utils/handleResponse");
 const ErrorWithDetail = require("../utils/ErrorWithDetail");
 const sendSms = require("../utils/SendSms");
-
+const config = require("../utils/config");
 
 exports.createChallangeInstance = functions.https.onRequest(async (req, res) => {
     try{
@@ -24,7 +24,7 @@ exports.createChallangeInstance = functions.https.onRequest(async (req, res) => 
             challangerId: challangerId,
         };
 
-        const challengeInstanceDb = root.ref("challengeInstanceDb");
+        const challengeInstanceDb = config.getChallengeInstancesDb();
 
         const challangeInstanceId= challengeInstanceDb.push(challangeInstance).getKey();
         handleResponse(req, res, {challangeInstanceId})
@@ -50,9 +50,9 @@ exports.addChallange = functions.https.onRequest(async (req, res) => {
         };
 
 
-        const challengeInstanceDb = root.ref("challengeInstanceDb");
-        const questionDb = root.ref("questions");
-        const questionChoiceDB = root.ref("questionsChoice");
+        const challengeInstanceDb = config.getChallengeInstancesDb();
+        const questionDb = config.getQuestionsDb();
+        const questionChoiceDB = config.getQuestionChoicesDb();
 
         var challangeExists = await (await challengeInstanceDb.child(challangeInstanceId).get()).val();
         var questionExists = await (await questionDb.child(questionId).get()).val();
@@ -69,7 +69,7 @@ exports.addChallange = functions.https.onRequest(async (req, res) => {
             throw new ErrorWithDetail("Invalid Data", "ChallangeInstance  dOes not exist");
         }
 
-        const db = root.ref("challanges");
+        const db = config.getChalllengesDb();
         var result = db.push(challange).getKey();
         handleResponse(req, res, { challange_id: "Challange added successfully" })
     } catch (err) {
@@ -87,7 +87,7 @@ exports.getChalllenge = functions.https.onRequest(async (req, res) => {
             }).required()
         
         const { challengeInstanceId } = mustValidate(validateSchema(), req.body);
-        const challengerDb = root.ref("challanges");
+        const challengerDb = config.getChalllengesDb();
         var questions =
         await challengerDb.orderByChild("challangeInstanceId").equalTo(challengeInstanceId).once("value", snapshot => {
             if (snapshot.exists()) {
@@ -115,7 +115,7 @@ exports.onChallengeCreated= functions.https.onRequest(async (req, res) => {
         const {challengeInstanceId} =mustValidate(validateSchema(), req.body);
 
         
-        const challengeInstanceDb = root.ref("challengeInstanceDb");
+        const challengeInstanceDb = config.getChallengeInstancesDb();
         
         var challangeExists = await (await challengeInstanceDb.child(challengeInstanceId).get()).val();
         if(challangeExists === null){
@@ -123,7 +123,7 @@ exports.onChallengeCreated= functions.https.onRequest(async (req, res) => {
         }
         challenge=JSON.parse(JSON.stringify(challangeExists));
         var uid=challenge.challangerId;
-        const usersDb = root.ref("users");
+        const usersDb = config.getUsersDb()
         var doesUserExist = await (await usersDb.child(uid).get()).val();
         if(doesUserExist === null){
             throw new ErrorWithDetail("Invalid Data","User Id linked with Challange Instance not found")
@@ -140,8 +140,8 @@ exports.onChallengeCreated= functions.https.onRequest(async (req, res) => {
 })
 
 function createSmsBodyHelper(challangeInstanceId,challangerName){
-    var body= challangerName+" has prepared your trival quiz Go to "
+    var body= challangerName+" has prepared your trivial quiz Go to "
     var link=process.env.FORNT_END_URL+challangeInstanceId
-    body=body+" to Complete your Challange!";
+    body=body+ link+" to Complete your Challange!";
     return body;
 }

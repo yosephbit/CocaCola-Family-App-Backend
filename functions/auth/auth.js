@@ -24,7 +24,7 @@ exports.sendCode = functions.https.onRequest(async (req, res) => {
         const { name, phone_number } = mustValidate(validateSchema(), req.body);
         
         var phone_inuse = false;
-        await root.ref("users").orderByChild("phone_number").equalTo(phone_number).once("value", snapshot => {
+        await config.getUsersDb().orderByChild("phone_number").equalTo(phone_number).once("value", snapshot => {
             if (snapshot.exists()) {
                 phone_inuse = true;
                 user=snapshot.val();

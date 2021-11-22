@@ -12,7 +12,7 @@ async function sendSms(to,body) {
     await client.messages.create({
         body: body,
         from: phone,
-        to: "+251941676278" //To be uncommented for testing purposes only
+        to: to //To be uncommented for testing purposes only
     }).then(message => logger.log(message.sid))
 }
 module.exports = sendSms

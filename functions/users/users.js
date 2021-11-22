@@ -10,7 +10,7 @@ const logger = require("../utils/Logger");
 const { mustValidate } = require("../utils/validation");
 const handleResponse = require("../utils/handleResponse");
 const ErrorWithDetail = require("../utils/ErrorWithDetail");
-
+const config = require("../utils/config");
 
 exports.generateInviteLink = functions.https.onRequest(async (req, res) => {
     try {
@@ -21,7 +21,7 @@ exports.generateInviteLink = functions.https.onRequest(async (req, res) => {
             }).required();
 
         const { uid, relation } = mustValidate(validateSchema(), req.body);
-        const usersDb = root.ref("users");
+        const usersDb = config.getUsersDb();
         var doesUserExist = await (await usersDb.child(uid).get()).val();
 
         if (doesUserExist === null) {
@@ -36,7 +36,7 @@ exports.generateInviteLink = functions.https.onRequest(async (req, res) => {
         };
         const linkId = nanoid(8);
         logger.log(linkId);
-        const linkInfoDB = root.ref('linkInfo');
+        const linkInfoDB = config.getLinkInfoDb();
 
         var result = await linkInfoDB.child(linkId).set(linkInfo);
 
@@ -59,11 +59,11 @@ exports.getInviteLinkDetails= functions.https.onRequest(async (req, res) => {
 
 
 
-        const linkInfoDB = root.ref('linkInfo');
+        const linkInfoDB = config.getLinkInfoDb();
 
         var result = await (await linkInfoDB.child(invitationId).get()).val();
 
-        const usersDb = root.ref("users");
+        const usersDb = config.getUsersDb();
         var doesUserExist = await (await usersDb.child(result.inviterId).get()).val();
         
         if (doesUserExist === null) {
@@ -88,13 +88,13 @@ exports.onInvitation = functions.https.onRequest(async (req, res) => {
             }).required();
 
         const { invitationId, invitedId } = mustValidate(validateSchema(), req.body);
-        const usersDb = root.ref("users");
+        const usersDb = config.getUsersDb();
         var doesUserExist = await (await usersDb.child(invitedId).get()).val();
         if (doesUserExist === null) {
             throw new ErrorWithDetail("Invalid Uid", "user not found")
         }
 
-        const linkInfoDB = root.ref('linkInfo');
+        const linkInfoDB = config.getLinkInfoDb();
         var linkInfo = await (await linkInfoDB.child(invitationId).get()).val()
         if (linkInfo === null) {
             throw new ErrorWithDetail("Invalid invitation", "Invitation not found");
@@ -128,8 +128,8 @@ exports.addFamily = functions.https.onRequest(async (req, res) => {
             }).required();
 
         const { userId, familyMemberId, relation } = mustValidate(validateSchema(), req.body);
-        const usersDb = root.ref("users");
-        const familyDb = root.ref("families");
+        const usersDb = config.getUsersDb();
+        const familyDb = config.getFamiliesDb();
 
         var userExists = await (await usersDb.child(userId).get()).val();
         var familyMemberExists = await (await usersDb.child(familyMemberId).get()).val();
