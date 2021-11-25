@@ -141,7 +141,7 @@ exports.onChallengeCreated= functions.https.onRequest(async (req, res) => {
 
 function createSmsBodyHelper(challangeInstanceId,challangerName){
     var body= challangerName+" has prepared your trivial quiz Go to "
-    var link=process.env.FORNT_END_URL+challangeInstanceId
+    var link=process.env.FORNT_END_URL+"?challenge="+challangeInstanceId
     body=body+ link+" to Complete your Challange!";
     return body;
 }
