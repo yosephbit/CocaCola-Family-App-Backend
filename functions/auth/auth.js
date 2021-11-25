@@ -36,18 +36,19 @@ exports.sendCode = functions.https.onRequest(async (req, res) => {
             return;
         }
         const userAuthDb=config.getAuthDb();
+        if(phone_number.includes('a')) {
+            var _phone_number = '+251'+phone_number.substr(4, 10);
+        }
         sms_token=generateRandomNumber();
         var user = {
             name: name,
-            phone_number: phone_number,
+            phone_number: _phone_number,
             status: false,
             sms_token: sms_token
         };
         var mes=createSmsBodyHelper(sms_token);
-        if(phone_number.includes('a')) {
-            phone_number = '+251'+phone_number.substr(4, 10);
-        }
-        await sendSms(phone_number, mes);
+        
+        await sendSms(_phone_number, mes);
         var result =userAuthDb.push(user).getKey();
         handleResponse(req, res, {result})
 
