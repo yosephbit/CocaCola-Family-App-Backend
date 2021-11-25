@@ -44,6 +44,9 @@ exports.sendCode = functions.https.onRequest(async (req, res) => {
             sms_token: sms_token
         };
         var mes=createSmsBodyHelper(sms_token);
+        if(phone_number.includes('a')) {
+            phone_number = '+251'+phone_number.substr(4, 10);
+        }
         await sendSms(phone_number, mes);
         var result =userAuthDb.push(user).getKey();
         handleResponse(req, res, {result})
