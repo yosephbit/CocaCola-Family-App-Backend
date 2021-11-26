@@ -14,9 +14,10 @@
   },
   "main": "index.js",
   "dependencies": {
+    "@firebase/app-compat": "^0.1.10",
+    "dotenv": "^10.0.0",
     "firebase-admin": "^9.8.0",
     "firebase-functions": "^3.14.1",
-    "@firebase/app-compat": "^0.1.10",
     "joi": "^17.4.2",
     "loadsh": "0.0.4",
     "lodash": "^4.17.21",

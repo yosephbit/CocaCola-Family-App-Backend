@@ -34,7 +34,7 @@ exports.sendCode = functions.https.onRequest(async (req, res) => {
             name: name,
             phone_number: _phone_number,
             status: false,
-            sms_token: '123456'
+            sms_token: sms_token
         };
         var mes=createSmsBodyHelper(sms_token);
         
@@ -69,7 +69,11 @@ exports.verifyToken = functions.https.onRequest(async (req, res) => {
             throw new ErrorWithDetail("Invalid Token", "sms token doesn't much")
         }
         var phone_inuse=false;
+<<<<<<< HEAD
         await config.getUsersDb().orderByChild("phone_number").equalTo(phone_number).once("value", snapshot => {
+=======
+        await config.getUsersDb().orderByChild("phone_number").equalTo(userAuth.phone_number).once("value", snapshot => {
+>>>>>>> fa36f82d4ad798823c23dcf4b1d31a618bba740e
             if (snapshot.exists()) {
                 phone_inuse = true;
                 user = snapshot.val();
