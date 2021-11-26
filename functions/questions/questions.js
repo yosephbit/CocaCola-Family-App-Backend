@@ -213,8 +213,9 @@ exports.getQuiz = functions.https.onRequest(async (req, res) => {
             throw new ErrorWithDetail("Invalid Data", "Number of questions is too high")
         }
         randmizedQuestions = shuffleArray(questions)
+        randmizedQuestions = randmizedQuestions.slice(0,numberOfQuestions)
         quizeArray = []
-        for (const question of questions) {
+        for (const question of randmizedQuestions) {
             var choice1 = await getQuestionsChoiceById(question[1].answersId.choiceID1);
             var choice2 = await getQuestionsChoiceById(question[1].answersId.choiceID2);
             var questionFull = {

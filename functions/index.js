@@ -49,7 +49,7 @@ exports.getScore = questions.getScore;
 
 exports.addChallange = challenges.addChallange; 
 
-exports.getChalllenge = challenges.getChalllenge;
+exports.getChallenge = challenges.getChallenge;
 
 exports.createChallangeInstance = challenges.createChallangeInstance;
 

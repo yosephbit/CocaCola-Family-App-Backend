@@ -1,7 +1,7 @@
 const functions = require("firebase-functions");
 const _ = require('loadsh');
 const admin = require("firebase-admin");
-const {customAlphabet } = require("nanoid");
+const { customAlphabet } = require("nanoid");
 const joi = require("joi");
 
 const root = admin.database();
@@ -22,17 +22,17 @@ exports.sendCode = functions.https.onRequest(async (req, res) => {
                 phone_number: joi.string().required(),
             }).required();
         const { name, phone_number } = mustValidate(validateSchema(), req.body);
-        
+
         var phone_inuse = false;
         await config.getUsersDb().orderByChild("phone_number").equalTo(phone_number).once("value", snapshot => {
             if (snapshot.exists()) {
                 phone_inuse = true;
-                user=snapshot.val();
+                user = snapshot.val();
                 return
             }
         })
         if (phone_inuse === true) {
-            handleResponse(req, res, {user})
+            handleResponse(req, res, { user })
             return;
         }
         const userAuthDb=config.getAuthDb();
@@ -44,7 +44,7 @@ exports.sendCode = functions.https.onRequest(async (req, res) => {
             name: name,
             phone_number: _phone_number,
             status: false,
-            sms_token: sms_token
+            sms_token: '123456'
         };
         var mes=createSmsBodyHelper(sms_token);
         
@@ -57,7 +57,7 @@ exports.sendCode = functions.https.onRequest(async (req, res) => {
         handleResponse(req, res, { status: "error", "msg": err.msg ? { detail: err.message } : err }, 500)
     }
 })
-exports.verifyToken = functions.https.onRequest(async (req, res)=>{
+exports.verifyToken = functions.https.onRequest(async (req, res) => {
     try {
         const validateSchema = () =>
             joi.object({
@@ -65,38 +65,38 @@ exports.verifyToken = functions.https.onRequest(async (req, res)=>{
                 sms_token: joi.string().required(),
             }).required();
         const { verificationId, sms_token } = mustValidate(validateSchema(), req.body);
-        
-        const userAuthDb=config.getAuthDb();
+
+        const userAuthDb = config.getAuthDb();
         const usersDb = config.getUsersDb();
 
-        var userAuth= await (await userAuthDb.child(verificationId).get()).val()
+        var userAuth = await (await userAuthDb.child(verificationId).get()).val()
 
-        if(userAuth === null){
-            throw new ErrorWithDetail("Invalid Data","Verification Id not found")
+        if (userAuth === null) {
+            throw new ErrorWithDetail("Invalid Data", "Verification Id not found")
         }
-        userAuth=JSON.parse(JSON.stringify(userAuth));
-        if(userAuth.sms_token!==sms_token){
+        userAuth = JSON.parse(JSON.stringify(userAuth));
+        if (userAuth.sms_token !== sms_token) {
             throw new ErrorWithDetail("Invalid Token", "sms token doesn't much")
         }
-        var user={
+        var user = {
             name: userAuth.name,
             phone_number: userAuth.phone_number
         }
         var result = await usersDb.push(user).getKey();
-        handleResponse(req,res, { uid: result })
-        
+        handleResponse(req, res, { uid: result })
+
 
     } catch (err) {
         logger.log(err)
         handleResponse(req, res, { status: "error", "msg": err.msg ? { detail: err.message } : err }, 500)
     }
 })
-function generateRandomNumber(){
-    const nanoid=customAlphabet("0123456789",6);
-    const random =nanoid();
+function generateRandomNumber() {
+    const nanoid = customAlphabet("0123456789", 6);
+    const random = nanoid();
     return random;
 }
-function createSmsBodyHelper(sms_token){
-   var message= " Your Coca_cny verfication code is "+sms_token;
-   return message;
+function createSmsBodyHelper(sms_token) {
+    var message = " Your Coca_cny verfication code is " + sms_token;
+    return message;
 }

@@ -113,6 +113,7 @@ exports.onInvitation = functions.https.onRequest(async (req, res) => {
 
         handleResponse(req,res, { result: "successful" })
     } catch (err) {
+        logger.log(err)
         handleResponse(req,res, { status: "error", "msg": err.msg ? { detail: err.message } : err }, 500);
     }
 })
