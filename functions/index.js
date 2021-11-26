@@ -60,3 +60,6 @@ exports.onChallengeCreated= challenges.onChallengeCreated;
 exports.sendCode=auth.sendCode;
 
 exports.verifyToken=auth.verifyToken;
+
+
+exports.addMultipleQuestions =questions.addMultipleQuestions;

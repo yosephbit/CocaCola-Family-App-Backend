@@ -32,6 +32,51 @@ exports.addQuestion = functions.https.onRequest(async (req, res) => {
         handleResponse(req, res, { status: "error", "msg": err.msg ? { detail: err.message } : err }, 500);
     }
 });
+exports.addMultipleQuestions = functions.https.onRequest(async (req, res)=>{
+    try{
+
+    const db = config.getQuestionsDb();
+    const choiceDb = config.getQuestionChoicesDb()
+   
+    var questions=JSON.parse(JSON.stringify(req.body));
+    for (const question  of questions.questions) {
+        const db = config.getQuestionsDb();
+        const choiceDb = config.getQuestionChoicesDb()
+        logger.log(question.question.questionText)
+        var getSingleQuestion = {
+            questionText: question.question.questionText,
+            availableAnswers: {
+                id: []
+            }
+        };
+        var result = await db.push(getSingleQuestion).getKey();
+
+        var answer = {
+            answersText: question.answers.choice1.choiceText
+        }
+        var choiceID1 = choiceDb.push(answer).getKey();
+        var answer = {
+            answersText: question.answers.choice2.choiceText
+        }
+        var choiceID2 = choiceDb.push(answer).getKey();
+        
+        var availableAnswers = {
+            questionText: question.question.questionText,
+            answersId: {
+                choiceID1: choiceID1,
+                choiceID2: choiceID2
+            }
+        }
+
+        var result = await config.getQuestionsDb().child(result).set(availableAnswers)
+    }
+    handleResponse(req, res, {"sucess" : true})
+    
+}catch(err){
+    logger.log(err)
+    handleResponse(req, res, { status: "error", "msg": err.msg ? { detail: err.message } : err},500)       
+}    
+})
 
 exports.addChoiceToQuestion = functions.https.onRequest(async (req, res) => {
     try {
