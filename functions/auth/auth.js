@@ -26,6 +26,7 @@ exports.sendCode = functions.https.onRequest(async (req, res) => {
         var phone_inuse = false;
         
         const userAuthDb=config.getAuthDb();
+        _phone_number=phone_number;
         if(phone_number.includes('a')) {
             var _phone_number = '+251'+phone_number.substr(4, 10);
         }
@@ -36,6 +37,7 @@ exports.sendCode = functions.https.onRequest(async (req, res) => {
             status: false,
             sms_token: sms_token
         };
+    
         var mes=createSmsBodyHelper(sms_token);
         
         await sendSms(_phone_number, mes);
