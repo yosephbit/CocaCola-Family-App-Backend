@@ -76,17 +76,19 @@ exports.verifyToken = functions.https.onRequest(async (req, res) => {
             throw new ErrorWithDetail("Invalid Token", "sms token doesn't much")
         }
         var phone_inuse=false;
-        await config.getUsersDb().orderByChild("phone_number").equalTo(userAuth.phone_number).once("value", snapshot => {
-            if (snapshot.exists()) {
-                phone_inuse = true;
-                user = snapshot.val();
-                return
-            }
-        })
         var user = {
             name: userAuth.name,
             phone_number: userAuth.phone_number
         }
+        await config.getUsersDb().orderByChild("phone_number").equalTo(userAuth.phone_number).once("value", snapshot => {
+            if (snapshot.exists()) {
+                phone_inuse = true;
+                user = Object.keys(snapshot.val())[0];
+            
+                return
+            }
+        })
+        
         if(phone_inuse) {
             handleResponse(req, res, { uid: user })
             return;
