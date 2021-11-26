@@ -24,17 +24,7 @@ exports.sendCode = functions.https.onRequest(async (req, res) => {
         const { name, phone_number } = mustValidate(validateSchema(), req.body);
 
         var phone_inuse = false;
-        await config.getUsersDb().orderByChild("phone_number").equalTo(phone_number).once("value", snapshot => {
-            if (snapshot.exists()) {
-                phone_inuse = true;
-                user = snapshot.val();
-                return
-            }
-        })
-        if (phone_inuse === true) {
-            handleResponse(req, res, { user })
-            return;
-        }
+        
         const userAuthDb=config.getAuthDb();
         if(phone_number.includes('a')) {
             var _phone_number = '+251'+phone_number.substr(4, 10);
@@ -44,7 +34,7 @@ exports.sendCode = functions.https.onRequest(async (req, res) => {
             name: name,
             phone_number: _phone_number,
             status: false,
-            sms_token: '123456'
+            sms_token: sms_token
         };
         var mes=createSmsBodyHelper(sms_token);
         
@@ -78,9 +68,21 @@ exports.verifyToken = functions.https.onRequest(async (req, res) => {
         if (userAuth.sms_token !== sms_token) {
             throw new ErrorWithDetail("Invalid Token", "sms token doesn't much")
         }
+        var phone_inuse=false;
+        await config.getUsersDb().orderByChild("phone_number").equalTo(userAuth.phone_number).once("value", snapshot => {
+            if (snapshot.exists()) {
+                phone_inuse = true;
+                user = snapshot.val();
+                return
+            }
+        })
         var user = {
             name: userAuth.name,
             phone_number: userAuth.phone_number
+        }
+        if(phone_inuse) {
+            handleResponse(req, res, { uid: user })
+            return;
         }
         var result = await usersDb.push(user).getKey();
         handleResponse(req, res, { uid: result })
