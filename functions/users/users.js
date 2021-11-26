@@ -62,8 +62,10 @@ exports.getInviteLinkDetails= functions.https.onRequest(async (req, res) => {
         const linkInfoDB = config.getLinkInfoDb();
 
         var result = await (await linkInfoDB.child(invitationId).get()).val();
-
         const usersDb = config.getUsersDb();
+        if(result.isUsed===true){
+            throw new ErrorWithDetail("Link Already Used","Link Already used")
+        }
         var doesUserExist = await (await usersDb.child(result.inviterId).get()).val();
         
         if (doesUserExist === null) {
