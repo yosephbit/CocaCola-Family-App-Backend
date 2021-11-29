@@ -12,6 +12,7 @@ const users = require('./users/users');
 const questions = require('./questions/questions');
 const challenges = require('./challenges/challenges');
 const auth = require('./auth/auth');
+const adminUsers =require('./admin/admin')
 
 exports.helloWorld = functions.https.onRequest((request, response) => {
   logger.log("asd")
@@ -32,7 +33,6 @@ exports.getInviteDetails = users.getInviteLinkDetails;
 
 //question related
 
-exports.addQuestion = questions.addQuestion; 
 
 exports.addChoiceToQuestion = questions.addChoiceToQuestion;
 
@@ -44,6 +44,11 @@ exports.getQuiz = questions.getQuiz;
 
 exports.getScore = questions.getScore;
 
+exports.addScoreForPlayTogether = questions.addScoreForPlayTogether;
+
+exports.addMultipleQuestions =questions.addMultipleQuestions;
+
+exports.getSingleScoreById = questions.getSingleScoreById;
 
 //challange related 
 
@@ -62,4 +67,22 @@ exports.sendCode=auth.sendCode;
 exports.verifyToken=auth.verifyToken;
 
 
-exports.addMultipleQuestions =questions.addMultipleQuestions;
+//admin only
+
+exports.addAdmin = adminUsers.addAdmin;
+
+exports.adminLogin=adminUsers.adminLogin;
+
+exports.addQuestion = questions.addQuestion; 
+
+exports.editQuestion = questions.editQuestion;
+
+exports.deleteQuestion = questions.deleteQuestion;
+
+exports.editQuestionChoice = questions.editQuestionChoice;
+
+exports.getUsersList = users.getUsersList;
+
+exports.getLinksList = adminUsers.adminLinkList;
+
+exports.getScoresList = questions.getScoresList;

@@ -11,6 +11,7 @@ const { mustValidate } = require("../utils/validation");
 const handleResponse = require("../utils/handleResponse");
 const ErrorWithDetail = require("../utils/ErrorWithDetail");
 const config = require("../utils/config");
+const checkSessions = require("../utils/checkSessions");
 
 exports.generateInviteLink = functions.https.onRequest(async (req, res) => {
     try {
@@ -141,7 +142,7 @@ exports.addFamily = functions.https.onRequest(async (req, res) => {
             throw new ErrorWithDetail("Invalid Data", "User not found");
         }
 
-        family = {
+        var family = {
             usersId: userId,
             familyMemberId: familyMemberId,
             relation: relation
@@ -154,3 +155,38 @@ exports.addFamily = functions.https.onRequest(async (req, res) => {
         handleResponse(req,res, { status: "error", "msg": err.msg ? { detail: err.message } : err }, 500);
     }
 })
+
+//admin 
+
+exports.getUsersList = functions.https.onRequest(async (req,res) => {
+    try {
+        const validateSchema = () =>
+        joi.object({
+            page: joi.number().required(),
+            itemsPerPage: joi.number().required(),
+            uid: joi.string().required(),
+            token: joi.string().required()
+        }).required();
+        const {page, itemsPerPage, uid, token} = mustValidate(validateSchema(), req.body)
+        const session = await checkSessions(token, uid);
+        if (!session){
+            throw new ErrorWithDetail("Invalid session","Sessions Expired")
+        }
+        
+        const usersDb =  config.getUsersDb()
+        var users = await (await usersDb.orderByKey().get()).val();
+        users = Object.entries(users)
+        var startAt = page*itemsPerPage
+        var endAt = startAt + itemsPerPage
+        users = users.slice(startAt, endAt)
+        handleResponse(req, res, users)
+    }catch(err){
+        logger.log(err);
+
+        handleResponse(req,res, { status: "error", "msg": err.msg ? { detail: err.message } : err }, 500);
+
+    }
+})
+
+
+

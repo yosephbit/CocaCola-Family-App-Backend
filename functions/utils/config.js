@@ -34,3 +34,15 @@ module.exports.getQuestionChoicesDb = function getQuestionChoicesDb(){
 module.exports.getLinkInfoDb = function getLinkInfoDb(){
     return root.ref("linkInfo");
 }
+
+module.exports.getAdminUsersDb = function getAdminUsersDb(){
+    return root.ref("adminUsers")
+}
+
+module.exports.getScoresDb = function getScoresDb(){
+    return root.ref("scores")
+}
+
+module.exports.getSessionsDb = function getSessionsDb(){
+    return root.ref("sessions")
+}

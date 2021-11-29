@@ -11,121 +11,6 @@ const handleResponse = require("../utils/handleResponse");
 const ErrorWithDetail = require("../utils/ErrorWithDetail");
 const config = require("../utils/config");
 
-exports.addQuestion = functions.https.onRequest(async (req, res) => {
-    try {
-        const validateSchema = () =>
-            joi.object({
-                questionText: joi.string().required()
-            }).required();
-        const { questionText } = mustValidate(validateSchema(), req.body);
-        var question = {
-            questionText: questionText,
-            availableAnswers: {
-                id: []
-            }
-        };
-
-        const db = config.getQuestionsDb();
-        var result = db.push(question).getKey();
-        handleResponse(req, res, { question_id: result })
-    } catch (err) {
-        handleResponse(req, res, { status: "error", "msg": err.msg ? { detail: err.message } : err }, 500);
-    }
-});
-exports.addMultipleQuestions = functions.https.onRequest(async (req, res)=>{
-    try{
-
-    const db = config.getQuestionsDb();
-    const choiceDb = config.getQuestionChoicesDb()
-   
-    var questions=JSON.parse(JSON.stringify(req.body));
-    for (const question  of questions.questions) {
-        const db = config.getQuestionsDb();
-        const choiceDb = config.getQuestionChoicesDb()
-        logger.log(question.question.questionText)
-        var getSingleQuestion = {
-            questionText: question.question.questionText,
-            availableAnswers: {
-                id: []
-            }
-        };
-        var result = await db.push(getSingleQuestion).getKey();
-
-        var answer = {
-            answersText: question.answers.choice1.choiceText
-        }
-        var choiceID1 = choiceDb.push(answer).getKey();
-        var answer = {
-            answersText: question.answers.choice2.choiceText
-        }
-        var choiceID2 = choiceDb.push(answer).getKey();
-        
-        var availableAnswers = {
-            questionText: question.question.questionText,
-            answersId: {
-                choiceID1: choiceID1,
-                choiceID2: choiceID2
-            }
-        }
-
-        var result = await config.getQuestionsDb().child(result).set(availableAnswers)
-    }
-    handleResponse(req, res, {"sucess" : true})
-    
-}catch(err){
-    logger.log(err)
-    handleResponse(req, res, { status: "error", "msg": err.msg ? { detail: err.message } : err},500)       
-}    
-})
-
-exports.addChoiceToQuestion = functions.https.onRequest(async (req, res) => {
-    try {
-        const validateSchema = () =>
-            joi.object({
-                qid: joi.string().required(),
-                answersText: joi.string().required()
-            }).required();
-        const { qid, answersText } = mustValidate(validateSchema(), req.body);
-        var answer = {
-            answersText: answersText,
-        };
-        const db = config.getQuestionChoicesDb();
-        var choiceID = db.push(answer).getKey();
-
-
-
-
-        const questionDb = config.getQuestionsDb()
-        var question = await (await questionDb.child(qid).get()).val();
-        if (question === null) {
-            throw new ErrorWithDetail(`Invalid Data". "Question Id not found"`);
-        }
-        if (question.answersId === undefined) {
-            var availableAnswers = {
-                questionText: question.questionText,
-                answersId: {
-                    choiceID1: choiceID
-                }
-            }
-        } else {
-            var availableAnswers = {
-                questionText: question.questionText,
-                answersId: {
-                    choiceID1: question.answersId.choiceID1,
-                    choiceID2: choiceID
-                }
-            }
-        }
-        var result = await config.getQuestionsDb().child(qid).set(availableAnswers)
-
-        handleResponse(req, res, { result: "successfully added answers" });
-    } catch (err) {
-        logger.log(err);
-        handleResponse(req, res, { status: "error", "msg": err.msg ? { detail: err.message } : err }, 500);
-    }
-
-});
-
 exports.addAnswers = functions.https.onRequest(async (req, res) => {
     try {
         const validateSchema = () =>
@@ -165,7 +50,8 @@ exports.addAnswers = functions.https.onRequest(async (req, res) => {
             challangeId: challangeId,
             respondentId: respondentId,
             questionId: questionId,
-            questionChoiceId: questionChoiceId
+            questionChoiceId: questionChoiceId,
+            timeStamp: Date.now()
         }
 
         var result = await answersDb.push(answer).getKey();
@@ -190,6 +76,7 @@ exports.getScore = functions.https.onRequest(async (req, res, next) => {
         const usersDb = config.getUsersDb();
         const challengesDb = config.getChalllengesDb();
         const answersDb = config.getAnswersDb();
+        const scoresDb = config.getScoresDb();
 
         var respondantExists = await (await usersDb.child(respondentId).get()).val();
 
@@ -225,6 +112,7 @@ exports.getScore = functions.https.onRequest(async (req, res, next) => {
         responses.forEach(singleResponse => {
             var result = subjectsAnswers.find(findAnswersByQuestionId.bind(this, singleResponse));
             if (result != undefined) {
+
                 if (result[1].answerId === singleResponse[1].questionChoiceId) {
                     score++;
                 }
@@ -232,7 +120,15 @@ exports.getScore = functions.https.onRequest(async (req, res, next) => {
         });
         //calculate Percentage 
         var percentage = (score / responses.length) * 100;
-        handleResponse(req, res, { "net score": score, "percentage": percentage });
+        var newScore = {
+            challangeId: challangeId,
+            respondentId: respondentId,
+            netScore: score,
+            percentage: percentage,
+            timeStamp: Date.now()
+        }
+        var result = await scoresDb.push(newScore).getKey();
+        handleResponse(req, res, { "scoreId": result,"net score": score, "percentage": percentage });
     } catch (err) {
         logger.log(err);
         handleResponse(req, res, { status: "error", "msg": err.msg ? { detail: err.message } : err }, 500)
@@ -258,7 +154,7 @@ exports.getQuiz = functions.https.onRequest(async (req, res) => {
             throw new ErrorWithDetail("Invalid Data", "Number of questions is too high")
         }
         randmizedQuestions = shuffleArray(questions)
-        randmizedQuestions = randmizedQuestions.slice(0,numberOfQuestions)
+        randmizedQuestions = randmizedQuestions.slice(0, numberOfQuestions)
         quizeArray = []
         for (const question of randmizedQuestions) {
             var choice1 = await getQuestionsChoiceById(question[1].answersId.choiceID1);
@@ -313,6 +209,64 @@ exports.getSingleQuestion = functions.https.onRequest(async (req, res) => {
 
     }
 })
+exports.getSingleScoreById = functions.https.onRequest(async (req, res) => {
+        try {
+        const validateSchema = () =>
+            joi.object({
+                scoreId: joi.string().required()
+            }).required();
+        const { scoreId } = mustValidate(validateSchema(), req.body);
+
+        const scoresDb = config.getScoresDb();
+
+        var scoreExists = await (await scoresDb.child(scoreId).get()).val();
+        if (scoreExists === null) {
+            throw new ErrorWithDetail("Invalid Data", "Score Id not found");
+        }
+        //only for pretty json
+        var score = scoreExists;
+        handleResponse(req, res, { score });
+
+    } catch (err) {
+        logger.log(err);
+        handleResponse(req, res, { status: "error", "msg": err.msg ? { detail: err.message } : err },)
+
+    }
+})
+exports.addScoreForPlayTogether = functions.https.onRequest(async (req,res)=>{
+    try {
+        const validateSchema = () =>
+            joi.object({
+                respondentId: joi.string().required(), 
+                netScore : joi.string().required(),
+                percentage: joi.string().required() 
+            }).required()
+        const { respondentId, netScore, percentage } = mustValidate(validateSchema(), req.body);
+
+        const usersDb = config.getUsersDb();
+        const scoresDb = config.getScoresDb();
+
+        var respondantExists = await (await usersDb.child(respondentId).get()).val();
+
+        if (respondantExists === null) {
+            throw new ErrorWithDetail("Invalid Data", "respondantId not found")
+        }
+
+        var newScore = {
+            respondentId: respondentId,
+            netScore: netScore,
+            percentage: percentage,
+            timeStamp: Date.now()
+        }
+        var result = await scoresDb.push(newScore).getKey();
+        handleResponse(req, res, { "scoreId": result,"net score": score, "percentage": percentage });
+    } catch (err) {
+        logger.log(err);
+        handleResponse(req, res, { status: "error", "msg": err.msg ? { detail: err.message } : err }, 500)
+    }
+})
+
+//helper functions
 function shuffleArray(array) {
 
     for (let i = array.length - 1; i > 0; i--) {
@@ -322,11 +276,6 @@ function shuffleArray(array) {
         array[j] = temp;
     }
     return array;
-}
-function filterAnswersBySubjectIdHelper(subjectId, answer) {
-
-    return answer[1].subjectId === subjectId;
-
 }
 function findAnswersByQuestionId(element, singleResponse) {
 
@@ -340,3 +289,260 @@ async function getQuestionsChoiceById(questionChoiceId) {
     return questionChoice;
 
 }
+
+
+///Questions Related API for admin
+
+
+exports.addQuestion = functions.https.onRequest(async (req, res) => {
+    try {
+        const validateSchema = () =>
+            joi.object({
+                questionText: joi.string().required(),
+                uid: joi.string().required(),
+                token: joi.string().required()
+            }).required();
+        const { questionText , uid, token} = mustValidate(validateSchema(), req.body);
+        const session = await checkSessions(token, uid);
+        if (!session){
+            throw new ErrorWithDetail("Invalid session","Sessions Expired")
+        }
+        var question = {
+            questionText: questionText,
+            availableAnswers: {
+                id: []
+            }
+        };
+
+        const db = config.getQuestionsDb();
+        var result = db.push(question).getKey();
+        handleResponse(req, res, { question_id: result })
+    } catch (err) {
+        handleResponse(req, res, { status: "error", "msg": err.msg ? { detail: err.message } : err }, 500);
+    }
+});
+
+exports.editQuestion = functions.https.onRequest(async (req, res) => {
+    try {
+        const validateSchema = () =>
+            joi.object({
+                questionId: joi.string().required(),
+                questionText: joi.string().required(),
+                uid: joi.string().required(),
+                token: joi.string().required()
+            }).required();
+        const { questionId, questionText, uid, token } = mustValidate(validateSchema(), req.body);
+        const session = await checkSessions(token, uid);
+        if (!session){
+            throw new ErrorWithDetail("Invalid session","Sessions Expired")
+        }
+        const questionsDb = config.getQuestionsDb();
+        var questionExists = await (await questionsDb.child(questionId).get()).val();
+        if (questionExists === null) {
+            throw new ErrorWithDetail("Invalid Data", "Question Id not found");
+        }
+        var question = {
+            questionText: questionText,
+            answerId: questionExists.answersId
+        };
+
+        var result = await questionsDb.child(questionId).set(question)
+        handleResponse(req, res, { question_id: question })
+    } catch (err) {
+        logger.log(err)
+        handleResponse(req, res, { status: "error", "msg": err.msg ? { detail: err.message } : err }, 500);
+    }
+})
+
+exports.deleteQuestion = functions.https.onRequest(async (req, res) => {
+    try {
+        const validateSchema = () =>
+            joi.object({
+                questionId: joi.string().required(),
+                uid: joi.string().required(),
+                token: joi.string().required()
+            }).required();
+        const { questionId, uid, token } = mustValidate(validateSchema(), req.body);
+        const session = await checkSessions(token, uid);
+        if (!session){
+            throw new ErrorWithDetail("Invalid session","Sessions Expired")
+        }
+        const questionsDb = config.getQuestionsDb();
+        var questionExists = await (await questionsDb.child(questionId).get()).val();
+        if (questionExists === null) {
+            throw new ErrorWithDetail("Invalid Data", "Question Id not found");
+        }
+
+
+        var result = await questionsDb.child(questionId).remove();
+        handleResponse(req, res, { result: result })
+    } catch (err) {
+        logger.log(err)
+        handleResponse(req, res, { status: "error", "msg": err.msg ? { detail: err.message } : err }, 500);
+    }
+})
+
+exports.addMultipleQuestions = functions.https.onRequest(async (req, res) => {
+    try {
+
+        const db = config.getQuestionsDb();
+        const choiceDb = config.getQuestionChoicesDb()
+
+        var questions = JSON.parse(JSON.stringify(req.body));
+        for (const question of questions.questions) {
+            const db = config.getQuestionsDb();
+            const choiceDb = config.getQuestionChoicesDb()
+            logger.log(question.question.questionText)
+            var getSingleQuestion = {
+                questionText: question.question.questionText,
+                availableAnswers: {
+                    id: []
+                }
+            };
+            var result = await db.push(getSingleQuestion).getKey();
+
+            var answer = {
+                answersText: question.answers.choice1.choiceText
+            }
+            var choiceID1 = choiceDb.push(answer).getKey();
+            var answer = {
+                answersText: question.answers.choice2.choiceText
+            }
+            var choiceID2 = choiceDb.push(answer).getKey();
+
+            var availableAnswers = {
+                questionText: question.question.questionText,
+                answersId: {
+                    choiceID1: choiceID1,
+                    choiceID2: choiceID2
+                }
+            }
+
+            var result = await config.getQuestionsDb().child(result).set(availableAnswers)
+        }
+        handleResponse(req, res, { "sucess": true })
+
+    } catch (err) {
+        logger.log(err)
+        handleResponse(req, res, { status: "error", "msg": err.msg ? { detail: err.message } : err }, 500)
+    }
+})
+
+exports.addChoiceToQuestion = functions.https.onRequest(async (req, res) => {
+    try {
+        const validateSchema = () =>
+            joi.object({
+                qid: joi.string().required(),
+                answersText: joi.string().required(),
+                uid: joi.string().required(),
+                token: joi.string().required()
+            }).required();
+        const { qid, answersText, uid, token } = mustValidate(validateSchema(), req.body);
+        const session = await checkSessions(token, uid);
+        if (!session){
+            throw new ErrorWithDetail("Invalid session","Sessions Expired")
+        }
+       
+        var answer = {
+            answersText: answersText,
+        };
+        const db = config.getQuestionChoicesDb();
+        var choiceID = db.push(answer).getKey();
+
+
+
+
+        const questionDb = config.getQuestionsDb()
+        var question = await (await questionDb.child(qid).get()).val();
+        if (question === null) {
+            throw new ErrorWithDetail(`Invalid Data". "Question Id not found"`);
+        }
+        if (question.answersId === undefined) {
+            var availableAnswers = {
+                questionText: question.questionText,
+                answersId: {
+                    choiceID1: choiceID
+                }
+            }
+        } else {
+            var availableAnswers = {
+                questionText: question.questionText,
+                answersId: {
+                    choiceID1: question.answersId.choiceID1,
+                    choiceID2: choiceID
+                }
+            }
+        }
+        var result = await config.getQuestionsDb().child(qid).set(availableAnswers)
+
+        handleResponse(req, res, { result: "successfully added answers" });
+    } catch (err) {
+        logger.log(err);
+        handleResponse(req, res, { status: "error", "msg": err.msg ? { detail: err.message } : err }, 500);
+    }
+
+});
+
+exports.editQuestionChoice = functions.https.onRequest(async (req, res) => {
+    try {
+        const validateSchema = () =>
+            joi.object({
+                choiceId: joi.string().required(),
+                answersText: joi.string().required(),
+                uid: joi.string().required(),
+                token: joi.string().required()
+            }).required();
+        const { choiceID, answersText, uid, token } = mustValidate(validateSchema(), req.body);
+        const session = await checkSessions(token, uid);
+        if (!session){
+            throw new ErrorWithDetail("Invalid session","Sessions Expired")
+        }
+       
+        const db = config.getQuestionChoicesDb();
+
+        var questionChoiceExists = await (await db.child(choiceID).get()).val();
+        if (questionChoiceExists === null) {
+            throw new ErrorWithDetail("Invalid Data", "Question Id not found");
+        }
+        var answerChoice = {
+            answersText: answersText,
+        };
+
+        var result = await db.child(choiceID).set(answerChoice)
+        handleResponse(req, res, { question_id: answerChoice })
+
+
+
+    } catch (err) {
+        logger.log(err);
+        handleResponse(req, res, { status: "error", "msg": err.msg ? { detail: err.message } : err }, 500);
+    }
+
+});
+
+exports.getScoresList = functions.https.onRequest(async (req, res) => {
+    try {
+        const validateSchema = () =>
+            joi.object({
+                page: joi.number().required(),
+                itemsPerPage: joi.number().required(),
+                uid: joi.string().required(),
+                token: joi.string().required()
+            }).required();
+        const { page, itemsPerPage, uid, token } = mustValidate(validateSchema(), req.body)
+        const session = await checkSessions(token, uid);
+        if (!session){
+            throw new ErrorWithDetail("Invalid session","Sessions Expired")
+        }
+        const getScoresDb = config.getScoresDb()
+        var scores = await (await getScoresDb.orderByKey().get()).val();
+        scores = Object.entries(scores)
+        var startAt = page * itemsPerPage
+        var endAt = startAt + itemsPerPage
+        scores = scores.slice(startAt, endAt)
+        handleResponse(req, res, scores)
+    } catch (err) {
+        logger.log(err);
+        handleResponse(req, res, { status: "error", "msg": err.msg ? { detail: err.message } : err }, 500);
+    }
+})

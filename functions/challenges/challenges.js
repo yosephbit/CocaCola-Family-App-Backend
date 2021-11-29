@@ -22,6 +22,7 @@ exports.createChallangeInstance = functions.https.onRequest(async (req, res) => 
         const { challangerId } = mustValidate(validateSchema(), req.body);
         const challangeInstance = {
             challangerId: challangerId,
+            timeStamp: Date.now()
         };
 
         const challengeInstanceDb = config.getChallengeInstancesDb();
@@ -39,7 +40,8 @@ exports.addChallange = functions.https.onRequest(async (req, res) => {
             joi.object({
                 challangeInstanceId: joi.string().required(),
                 questionId: joi.string().required(),
-                answerId: joi.string().required()
+                answerId: joi.string().required(), 
+                timeStamp: Date.now()
             }).required();
         const { questionId, answerId, challangeInstanceId } = mustValidate(validateSchema(), req.body);
 
@@ -178,7 +180,7 @@ function createSmsBodyHelper(challangeInstanceId,challangerName){
 async function getQuestionsChoiceById(questionChoiceId) {
     var questionsChoiceDb = config.getQuestionChoicesDb();
 
-    questionChoice = await (await questionsChoiceDb.child(questionChoiceId).get()).val();
+    var questionChoice = await (await questionsChoiceDb.child(questionChoiceId).get()).val();
     return questionChoice;
 
 }
