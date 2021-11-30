@@ -34,16 +34,22 @@ exports.addAnswers = functions.https.onRequest(async (req, res) => {
         var questionChoiceExists = await (await questionChoiceDB.child(questionChoiceId).get()).val();
 
         if (respondentExists === null) {
-            throw new ErrorWithDetail("Invalid Data", "Respondent Id not found");
+            handleResponse(req, res, { status: "error", "msg": "respondant Id not found" }, 404)
+            return 
         }
         if (questionExists === null) {
-            throw new ErrorWithDetail("Invalid Data", "Questions Id not found")
+
+            handleResponse(req, res, { status: "error", "msg": "respondant Id not found" }, 401)
+            return
         }
         if (questionChoiceExists === null) {
-            throw new ErrorWithDetail("Invalid Data", "Questions Choice Id not found")
+
+            handleResponse(req, res, { status: "error", "msg": "Questions Choice Id not found" }, 404)
+            return
         }
         if (challangeInstanceExists === null) {
-            throw new ErrorWithDetail("Invalid Data", "Challange instance Id not found")
+            handleResponse(req, res, { status: "error", "msg": "Challenge Id not found" }, 404)
+            return 
         }
 
         answer = {
@@ -81,7 +87,8 @@ exports.getScore = functions.https.onRequest(async (req, res, next) => {
         var respondantExists = await (await usersDb.child(respondentId).get()).val();
 
         if (respondantExists === null) {
-            throw new ErrorWithDetail("Invalid Data", "respondantId not found")
+            handleResponse(req, res, { status: "error", "msg": "respondandt Id not found" }, 401)
+            return 
         }
 
         var responses;
@@ -89,8 +96,9 @@ exports.getScore = functions.https.onRequest(async (req, res, next) => {
             if (snapshot.exists()) {
                 responses = snapshot.val();
             } else {
-                throw new ErrorWithDetail("Invalid Data", "Challanger dsds Id not found in challange")
-
+                handleResponse(req, res, { status: "error", "msg": "Challenger Id not found" }, 401)
+                return 
+           
             }
         });
         responses = Object.entries(responses);
@@ -101,7 +109,9 @@ exports.getScore = functions.https.onRequest(async (req, res, next) => {
             if (snapshot.exists()) {
                 subjectsAnswers = snapshot.val();
             } else {
-                throw new ErrorWithDetail("Invalid Data", "Challanger Id not found in challange")
+
+                handleResponse(req, res, { status: "error", "msg": "Challenger Id not found" }, 404)
+                return
 
             }
         });
@@ -128,7 +138,7 @@ exports.getScore = functions.https.onRequest(async (req, res, next) => {
             timeStamp: Date.now()
         }
         var result = await scoresDb.push(newScore).getKey();
-        handleResponse(req, res, { "scoreId": result,"net score": score, "percentage": percentage });
+        handleResponse(req, res, { "scoreId": result, "net score": score, "percentage": percentage });
     } catch (err) {
         logger.log(err);
         handleResponse(req, res, { status: "error", "msg": err.msg ? { detail: err.message } : err }, 500)
@@ -151,7 +161,8 @@ exports.getQuiz = functions.https.onRequest(async (req, res) => {
         logger.log(questions.length)
         //questions=JSON.stringify(questions);
         if (questions.length < numberOfQuestions) {
-            throw new ErrorWithDetail("Invalid Data", "Number of questions is too high")
+            handleResponse(req, res, { status: "error", "msg": "Number of questions is too high" }, 404)
+            return 
         }
         randmizedQuestions = shuffleArray(questions)
         randmizedQuestions = randmizedQuestions.slice(0, numberOfQuestions)
@@ -197,7 +208,8 @@ exports.getSingleQuestion = functions.https.onRequest(async (req, res) => {
 
         var questionExists = await (await questionsDb.child(questionId).get()).val();
         if (questionExists === null) {
-            throw new ErrorWithDetail("Invalid Data", "Question Id not found");
+            handleResponse(req, res, { status: "error", "msg": "Question Id not found" }, 404)
+            return 
         }
         //only for pretty json
         var question = questionExists;
@@ -210,7 +222,7 @@ exports.getSingleQuestion = functions.https.onRequest(async (req, res) => {
     }
 })
 exports.getSingleScoreById = functions.https.onRequest(async (req, res) => {
-        try {
+    try {
         const validateSchema = () =>
             joi.object({
                 scoreId: joi.string().required()
@@ -221,7 +233,8 @@ exports.getSingleScoreById = functions.https.onRequest(async (req, res) => {
 
         var scoreExists = await (await scoresDb.child(scoreId).get()).val();
         if (scoreExists === null) {
-            throw new ErrorWithDetail("Invalid Data", "Score Id not found");
+            handleResponse(req, res, { status: "error", "msg": "Score Id not found" }, 404)
+            return
         }
         //only for pretty json
         var score = scoreExists;
@@ -233,13 +246,13 @@ exports.getSingleScoreById = functions.https.onRequest(async (req, res) => {
 
     }
 })
-exports.addScoreForPlayTogether = functions.https.onRequest(async (req,res)=>{
+exports.addScoreForPlayTogether = functions.https.onRequest(async (req, res) => {
     try {
         const validateSchema = () =>
             joi.object({
-                respondentId: joi.string().required(), 
-                netScore : joi.string().required(),
-                percentage: joi.string().required() 
+                respondentId: joi.string().required(),
+                netScore: joi.string().required(),
+                percentage: joi.string().required()
             }).required()
         const { respondentId, netScore, percentage } = mustValidate(validateSchema(), req.body);
 
@@ -249,7 +262,9 @@ exports.addScoreForPlayTogether = functions.https.onRequest(async (req,res)=>{
         var respondantExists = await (await usersDb.child(respondentId).get()).val();
 
         if (respondantExists === null) {
-            throw new ErrorWithDetail("Invalid Data", "respondantId not found")
+
+            handleResponse(req, res, { status: "error", "msg": "respondant Id not found" }, 401)
+            return
         }
 
         var newScore = {
@@ -259,7 +274,7 @@ exports.addScoreForPlayTogether = functions.https.onRequest(async (req,res)=>{
             timeStamp: Date.now()
         }
         var result = await scoresDb.push(newScore).getKey();
-        handleResponse(req, res, { "scoreId": result,"net score": score, "percentage": percentage });
+        handleResponse(req, res, { "scoreId": result, "net score": score, "percentage": percentage });
     } catch (err) {
         logger.log(err);
         handleResponse(req, res, { status: "error", "msg": err.msg ? { detail: err.message } : err }, 500)
@@ -302,10 +317,11 @@ exports.addQuestion = functions.https.onRequest(async (req, res) => {
                 uid: joi.string().required(),
                 token: joi.string().required()
             }).required();
-        const { questionText , uid, token} = mustValidate(validateSchema(), req.body);
+        const { questionText, uid, token } = mustValidate(validateSchema(), req.body);
         const session = await checkSessions(token, uid);
-        if (!session){
-            throw new ErrorWithDetail("Invalid session","Sessions Expired")
+        if (!session) {
+            handleResponse(req, res, { status: "error", "msg": "Session Expired" }, 401)
+            return
         }
         var question = {
             questionText: questionText,
@@ -333,13 +349,16 @@ exports.editQuestion = functions.https.onRequest(async (req, res) => {
             }).required();
         const { questionId, questionText, uid, token } = mustValidate(validateSchema(), req.body);
         const session = await checkSessions(token, uid);
-        if (!session){
-            throw new ErrorWithDetail("Invalid session","Sessions Expired")
+        if (!session) {
+            handleResponse(req, res, { status: "error", "msg": "Session Expired" }, 401)
+            return ("Invalid session", "Sessions Expired")
         }
         const questionsDb = config.getQuestionsDb();
         var questionExists = await (await questionsDb.child(questionId).get()).val();
         if (questionExists === null) {
-            throw new ErrorWithDetail("Invalid Data", "Question Id not found");
+
+            handleResponse(req, res, { status: "error", "msg": "Question Id not found" }, 404)
+            return
         }
         var question = {
             questionText: questionText,
@@ -364,13 +383,17 @@ exports.deleteQuestion = functions.https.onRequest(async (req, res) => {
             }).required();
         const { questionId, uid, token } = mustValidate(validateSchema(), req.body);
         const session = await checkSessions(token, uid);
-        if (!session){
-            throw new ErrorWithDetail("Invalid session","Sessions Expired")
+        if (!session) {
+
+            handleResponse(req, res, { status: "error", "msg": "Session Expired" }, 401)
+            return
         }
         const questionsDb = config.getQuestionsDb();
         var questionExists = await (await questionsDb.child(questionId).get()).val();
         if (questionExists === null) {
-            throw new ErrorWithDetail("Invalid Data", "Question Id not found");
+
+            handleResponse(req, res, { status: "error", "msg": "Question Id not found" }, 404)
+            return
         }
 
 
@@ -439,10 +462,12 @@ exports.addChoiceToQuestion = functions.https.onRequest(async (req, res) => {
             }).required();
         const { qid, answersText, uid, token } = mustValidate(validateSchema(), req.body);
         const session = await checkSessions(token, uid);
-        if (!session){
-            throw new ErrorWithDetail("Invalid session","Sessions Expired")
+        if (!session) {
+
+            handleResponse(req, res, { status: "error", "msg": "Session Expired" }, 401)
+            return
         }
-       
+
         var answer = {
             answersText: answersText,
         };
@@ -455,7 +480,8 @@ exports.addChoiceToQuestion = functions.https.onRequest(async (req, res) => {
         const questionDb = config.getQuestionsDb()
         var question = await (await questionDb.child(qid).get()).val();
         if (question === null) {
-            throw new ErrorWithDetail(`Invalid Data". "Question Id not found"`);
+            handleResponse(req, res, { status: "error", "msg": "Question Id not found" }, 404)
+            return
         }
         if (question.answersId === undefined) {
             var availableAnswers = {
@@ -494,15 +520,17 @@ exports.editQuestionChoice = functions.https.onRequest(async (req, res) => {
             }).required();
         const { choiceID, answersText, uid, token } = mustValidate(validateSchema(), req.body);
         const session = await checkSessions(token, uid);
-        if (!session){
-            throw new ErrorWithDetail("Invalid session","Sessions Expired")
+        if (!session) {
+            handleResponse(req, res, { status: "error", "msg": "Session Expired" }, 401)
+            return
         }
-       
+
         const db = config.getQuestionChoicesDb();
 
         var questionChoiceExists = await (await db.child(choiceID).get()).val();
         if (questionChoiceExists === null) {
-            throw new ErrorWithDetail("Invalid Data", "Question Id not found");
+            handleResponse(req, res, { status: "error", "msg": "Question Id not found" }, 404)
+            return
         }
         var answerChoice = {
             answersText: answersText,
@@ -531,8 +559,9 @@ exports.getScoresList = functions.https.onRequest(async (req, res) => {
             }).required();
         const { page, itemsPerPage, uid, token } = mustValidate(validateSchema(), req.body)
         const session = await checkSessions(token, uid);
-        if (!session){
-            throw new ErrorWithDetail("Invalid session","Sessions Expired")
+        if (!session) {
+            handleResponse(req, res, { status: "error", "msg": "Sessions Expired" }, 401)
+            return
         }
         const getScoresDb = config.getScoresDb()
         var scores = await (await getScoresDb.orderByKey().get()).val();

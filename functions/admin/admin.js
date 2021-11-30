@@ -28,7 +28,8 @@ exports.addAdmin = functions.https.onRequest(async (req, res) => {
 
         const session = await checkSessions(token, uid);
         if (!session) {
-            throw new ErrorWithDetail("Invalid session", "Sessions Expired")
+            handleResponse(req, res, { status: "error", "msg": "Session Expired" }, 401)
+            return
         }
 
         const adminUsersDb = config.getAdminUsersDb();
@@ -43,7 +44,8 @@ exports.addAdmin = functions.https.onRequest(async (req, res) => {
         })
 
         if (adminExists) {
-            throw new ErrorWithDetail("Invalid Data", "Username already exists")
+            handleResponse(req, res, { status: "error", "msg": "Invalid Data Username already toekn" }, 401)
+            return
         }
         var admin = {
             username: username,
@@ -82,12 +84,14 @@ exports.adminLogin = functions.https.onRequest(async (req, res) => {
             }
         })
         if (admin === null) {
-            throw new ErrorWithDetail("username or passowrd not found")
+            handleResponse(req, res, { status: "error", "msg": "username or passowrd not found" }, 402)
+            return 
         }
         admin = JSON.parse(JSON.stringify(admin));
         var catchedPassword = Object.values(admin)[0]?.password
         if (catchedPassword !== password) {
-            throw new ErrorWithDetail("username or password not found")
+            handleResponse(req, res, { status: "error", "msg": "username or password not found" }, 402)
+            return
         }
         var dt = new Date()
         var ttl = dt.setHours(dt.getHours() + 24) //session valid for three hours
@@ -116,7 +120,8 @@ exports.adminLinkList = functions.https.onRequest(async (req, res) => {
         const { page, itemsPerPage, uid, token } = mustValidate(validateSchema(), req.body)
         const session = await checkSessions(token, uid);
         if (!session) {
-            throw new ErrorWithDetail("Invalid session", "Sessions Expired")
+            handleResponse(req, res, { status: "error", "msg": "Session Expired" }, 401)
+            return
         }
         const linkInfoDB = config.getLinkInfoDb()
         var links = await (await linkInfoDB.orderByKey().get()).val();

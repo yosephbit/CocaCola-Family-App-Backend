@@ -40,7 +40,7 @@ exports.addChallange = functions.https.onRequest(async (req, res) => {
             joi.object({
                 challangeInstanceId: joi.string().required(),
                 questionId: joi.string().required(),
-                answerId: joi.string().required(), 
+                answerId: joi.string().required(),
                 timeStamp: Date.now()
             }).required();
         const { questionId, answerId, challangeInstanceId } = mustValidate(validateSchema(), req.body);
@@ -62,13 +62,18 @@ exports.addChallange = functions.https.onRequest(async (req, res) => {
 
 
         if (questionExists === null) {
-            throw new ErrorWithDetail("Invalid Data", "Questions Id not found")
+
+            handleResponse(req, res, { status: "error", "msg": "question Id not found" }, 404)
+            return
         }
         if (questionChoiceExists === null) {
-            throw new ErrorWithDetail("Invalid Data", "Questions Choice Id not found")
+
+            handleResponse(req, res, { status: "error", "msg": "Questions Choice Id not found" }, 404)
+            return
         }
         if (challangeExists === null) {
-            throw new ErrorWithDetail("Invalid Data", "ChallangeInstance  dOes not exist");
+            handleResponse(req, res, { status: "error", "msg": "Challenge Instance Id not found" }, 404)
+            return
         }
 
         const db = config.getChalllengesDb();
@@ -95,18 +100,20 @@ exports.getChallenge = functions.https.onRequest(async (req, res) => {
                 if (snapshot.exists()) {
                     questions = snapshot.val();
                 } else {
-                    throw new ErrorWithDetail("Invalid Data", "Challanger Id not found in challange")
+
+                    handleResponse(req, res, { status: "error", "msg": "Challenger Id not found" }, 404)
+                    return
                 }
             });
         challengeQuestions = Object.entries(JSON.parse(JSON.stringify(challengeQuestions)))
         quizeArray = []
         for (const question of challengeQuestions) {
-            
-            const questionsDb = config.getQuestionsDb(); 
-            questionDetails =  await (await questionsDb.child(question[1]?.questionId).get()).val();
+
+            const questionsDb = config.getQuestionsDb();
+            questionDetails = await (await questionsDb.child(question[1]?.questionId).get()).val();
             var choice1 = await getQuestionsChoiceById(questionDetails?.answersId?.choiceID1);
             var choice2 = await getQuestionsChoiceById(questionDetails?.answersId?.choiceID2);
-            
+
             var questionFull = {
                 "question": {
                     "questionId": question[1]?.questionId,
@@ -149,14 +156,16 @@ exports.onChallengeCreated = functions.https.onRequest(async (req, res) => {
 
         var challangeExists = await (await challengeInstanceDb.child(challengeInstanceId).get()).val();
         if (challangeExists === null) {
-            throw new ErrorWithDetail("Invalid Data", "Challane Instance Id not found")
+            handleResponse(req, res, { status: "error", "msg": "Challenge Instance Id not found" }, 404)
+            return
         }
         challenge = JSON.parse(JSON.stringify(challangeExists));
         var uid = challenge.challangerId;
         const usersDb = config.getUsersDb()
         var doesUserExist = await (await usersDb.child(uid).get()).val();
         if (doesUserExist === null) {
-            throw new ErrorWithDetail("Invalid Data", "User Id linked with Challange Instance not found")
+            handleResponse(req, res, { status: "error", "msg": "user not found" }, 401)
+            return
         }
         user = JSON.parse(JSON.stringify(doesUserExist));
         var smsTo = user.phone_number
@@ -169,10 +178,10 @@ exports.onChallengeCreated = functions.https.onRequest(async (req, res) => {
     }
 })
 
-function createSmsBodyHelper(challangeInstanceId,challangerName){
-    var body= challangerName+" has prepared your trivial quiz Go to "
-    var link=process.env.FORNT_END_URL+"?challenge="+challangeInstanceId
-    body=body+ link+" to Complete your Challange!";
+function createSmsBodyHelper(challangeInstanceId, challangerName) {
+    var body = challangerName + " has prepared your trivial quiz Go to "
+    var link = process.env.FORNT_END_URL + "?challenge=" + challangeInstanceId
+    body = body + link + " to Complete your Challange!";
     return body;
 }
 

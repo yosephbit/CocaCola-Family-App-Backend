@@ -24,16 +24,16 @@ exports.sendCode = functions.https.onRequest(async (req, res) => {
         const { name, phone_number } = mustValidate(validateSchema(), req.body);
 
         var phone_inuse = false;
-        
-        const userAuthDb=config.getAuthDb();
-        _phone_number=phone_number;
-        if(phone_number.includes('a')) {
-            var _phone_number = '+251'+phone_number.substr(4, 10);
+
+        const userAuthDb = config.getAuthDb();
+        _phone_number = phone_number;
+        if (phone_number.includes('a')) {
+            var _phone_number = '+251' + phone_number.substr(4, 10);
         }
-        sms_token=generateRandomNumber();
-        if(phone_number.includes('12345678')) {
-            var _phone_number = '+251'+phone_number.substr(4, 10);
-            sms_token='123456';
+        sms_token = generateRandomNumber();
+        if (phone_number.includes('12345678')) {
+            var _phone_number = '+251' + phone_number.substr(4, 10);
+            sms_token = '123456';
         }
         var user = {
             name: name,
@@ -41,13 +41,13 @@ exports.sendCode = functions.https.onRequest(async (req, res) => {
             status: false,
             sms_token: sms_token
         };
-    
-        var mes=createSmsBodyHelper(sms_token);
-        if(sms_token!=='123456') {
-         await sendSms(_phone_number, mes);
+
+        var mes = createSmsBodyHelper(sms_token);
+        if (sms_token !== '123456') {
+            await sendSms(_phone_number, mes);
         }
-        var result =userAuthDb.push(user).getKey();
-        handleResponse(req, res, {result})
+        var result = userAuthDb.push(user).getKey();
+        handleResponse(req, res, { result })
 
     } catch (err) {
         logger.log(err)
@@ -69,13 +69,15 @@ exports.verifyToken = functions.https.onRequest(async (req, res) => {
         var userAuth = await (await userAuthDb.child(verificationId).get()).val()
 
         if (userAuth === null) {
-            throw new ErrorWithDetail("Invalid Data", "Verification Id not found")
+            handleResponse(req, res, { status: "error", "msg": "Verification Id not found" }, 401)
+            return
         }
         userAuth = JSON.parse(JSON.stringify(userAuth));
         if (userAuth.sms_token !== sms_token) {
-            throw new ErrorWithDetail("Invalid Token", "sms token doesn't much")
+            handleResponse(req, res, { status: "error", "msg": "token mismatch" }, 401)
+            return
         }
-        var phone_inuse=false;
+        var phone_inuse = false;
         var user = {
             name: userAuth.name,
             phone_number: userAuth.phone_number
@@ -84,12 +86,12 @@ exports.verifyToken = functions.https.onRequest(async (req, res) => {
             if (snapshot.exists()) {
                 phone_inuse = true;
                 user = Object.keys(snapshot.val())[0];
-            
+
                 return
             }
         })
-        
-        if(phone_inuse) {
+
+        if (phone_inuse) {
             handleResponse(req, res, { uid: user })
             return;
         }
