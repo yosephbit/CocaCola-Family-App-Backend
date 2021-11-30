@@ -13,15 +13,16 @@ const questions = require('./questions/questions');
 const challenges = require('./challenges/challenges');
 const auth = require('./auth/auth');
 const adminUsers =require('./admin/admin')
+const startupScript = require('./startupScript')
 
 exports.helloWorld = functions.https.onRequest((request, response) => {
   logger.log("asd")
   response.send("Hello from Firebase!");
 });
 
+ startupScript.createAdmin()
 
 ///user related
-
 
 exports.generateInviteLink = users.generateInviteLink;
 
