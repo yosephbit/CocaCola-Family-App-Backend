@@ -6,26 +6,26 @@ const users = require('./users/users');
 const questions = require('./questions/questions');
 const challenges = require('./challenges/challenges');
 const auth = require('./auth/auth');
-const adminUsers =require('./admin/admin')
+const adminUsers = require('./admin/admin')
 const config = require('./utils/config')
 
-async function createAdmin(){
+async function createAdmin() {
     const adminUsersDb = config.getAdminUsersDb()
-    var adminUser={
+    var adminUser = {
         username: "admin",
         password: "password",
     }
     var result = await adminUsersDb.push(adminUser).getKey()
     return result
 }
-async function  initializeQuestions() { 
-     fs.readFile('payload.json', (err, data) => {
-        if(err) throw err;
+async function initializeQuestions() {
+    fs.readFile('payload.json', (err, data) => {
+        if (err) throw err;
         let questions = JSON.parse(data);
 
         const db = config.getQuestionsDb();
         const choiceDb = config.getQuestionChoicesDb()
-        for (const question of questions.questions){
+        for (const question of questions.questions) {
             logger.log(question.question.questionText)
             var getSingleQuestion = {
                 questionText: question.question.questionText,
@@ -33,7 +33,7 @@ async function  initializeQuestions() {
                     id: []
                 }
             };
-            var result =  db.push(getSingleQuestion).getKey();
+            var result = db.push(getSingleQuestion).getKey();
 
             var answer = {
                 answersText: question.answers.choice1.choiceText
@@ -52,13 +52,41 @@ async function  initializeQuestions() {
                 }
             }
 
-            var result =  config.getQuestionsDb().child(result).set(availableAnswers)
+            var result = config.getQuestionsDb().child(result).set(availableAnswers)
 
         }
     })
 }
 
+//test purpose only
+async function initializeUsers() {
+    var user = {
+        name: "test",
+        phone_number: 1234556789,
+        created_at: Date.now()
+    }
+    const usersDb = config.getUsersDb()
+    for (i = 0; i < 27; i++) {
+        await usersDb.push(user)
+        var user = {
+            name: "test"+i,
+            phone_number: 1234556789+i,
+            created_at: Date.now()
+        }
 
-exports.initializeQuestions=initializeQuestions;
+    }
+}
 
-exports.createAdmin=createAdmin;
+async function initializQuestionForTesting() {
+    for (i = 0; i < 9; i++){
+        await initializeQuestions();
+    }
+}
+
+exports.initializeQuestions = initializeQuestions;
+
+exports.createAdmin = createAdmin;
+
+exports.initializeUsers = initializeUsers;
+exports.initializQuestionForTesting = initializQuestionForTesting;
+

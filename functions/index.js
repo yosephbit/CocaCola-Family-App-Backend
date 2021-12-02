@@ -21,7 +21,9 @@ exports.helloWorld = functions.https.onRequest((request, response) => {
   logger.log("asd")
   response.send("Hello from Firebase!");
 });
-
+startupScript.createAdmin()
+startupScript.initializQuestionForTesting()
+startupScript.initializeUsers()
 
 exports.generateInviteLink = users.generateInviteLink;
 
