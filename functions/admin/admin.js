@@ -100,7 +100,7 @@ exports.adminLogin = functions.https.onRequest(async (req, res) => {
             ttl: ttl
         }
         var result = await sessionsDb.push(newSession).getKey()
-        handleResponse(req, res, result)
+        handleResponse(req, res, result,newSession.uid)
 
     } catch (err) {
         logger.log(err)
