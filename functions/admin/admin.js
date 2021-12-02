@@ -12,7 +12,7 @@ const handleResponse = require("../utils/handleResponse");
 const ErrorWithDetail = require("../utils/ErrorWithDetail");
 const config = require("../utils/config");
 const { now } = require("lodash");
-
+const checkSessions = require("../utils/checkSessions");
 exports.addAdmin = functions.https.onRequest(async (req, res) => {
     try {
 

@@ -10,6 +10,7 @@ const { mustValidate } = require("../utils/validation");
 const handleResponse = require("../utils/handleResponse");
 const ErrorWithDetail = require("../utils/ErrorWithDetail");
 const config = require("../utils/config");
+const checkSessions = require("../utils/checkSessions");
 
 exports.addAnswers = functions.https.onRequest(async (req, res) => {
     try {
@@ -135,10 +136,12 @@ exports.getScore = functions.https.onRequest(async (req, res, next) => {
             respondentId: respondentId,
             netScore: score,
             percentage: percentage,
-            timeStamp: Date.now()
+            timeStamp: Date.now(),
+            shareCode: generateRandomNumber(),
+
         }
         var result = await scoresDb.push(newScore).getKey();
-        handleResponse(req, res, { "scoreId": result, "net score": score, "percentage": percentage });
+        handleResponse(req, res, { "scoreId": result, "net score": score, "percentage": percentage,"shareCode": newScore.shareCode });
     } catch (err) {
         logger.log(err);
         handleResponse(req, res, { status: "error", "msg": err.msg ? { detail: err.message } : err }, 500)
@@ -575,3 +578,9 @@ exports.getScoresList = functions.https.onRequest(async (req, res) => {
         handleResponse(req, res, { status: "error", "msg": err.msg ? { detail: err.message } : err }, 500);
     }
 })
+
+function generateRandomNumber() {
+    const nanoid = customAlphabet("0123456789", 6);
+    const random = nanoid();
+    return random;
+}
