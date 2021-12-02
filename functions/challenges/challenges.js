@@ -171,7 +171,7 @@ exports.onChallengeCreated = functions.https.onRequest(async (req, res) => {
         var smsTo = user.phone_number
         var smsBody = createSmsBodyHelper(challengeInstanceId, user.name)
         await sendSms(smsTo, smsBody);
-        handleResponse(req, res, { "message": "SMS sent successfully" });
+        handleResponse(req, res, { "message": smsBody.toString() });
     } catch (err) {
         logger.log(err);
         handleResponse(req, res, { status: "error", "msg": err.msg ? { detail: err.message } : err }, 500)

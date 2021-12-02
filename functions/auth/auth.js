@@ -80,7 +80,8 @@ exports.verifyToken = functions.https.onRequest(async (req, res) => {
         var phone_inuse = false;
         var user = {
             name: userAuth.name,
-            phone_number: userAuth.phone_number
+            phone_number: userAuth.phone_number,
+            created_at: Date.now()
         }
         await config.getUsersDb().orderByChild("phone_number").equalTo(userAuth.phone_number).once("value", snapshot => {
             if (snapshot.exists()) {
