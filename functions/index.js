@@ -90,3 +90,5 @@ exports.getLinksList = adminUsers.adminLinkList;
 exports.getScoresList = questions.getScoresList;
 
 exports.getQuestionsList = questions.getQuestionsList;
+
+exports.getDashBoardStats = adminUsers.getDashBoardStats;

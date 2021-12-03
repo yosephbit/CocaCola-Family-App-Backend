@@ -135,3 +135,43 @@ exports.adminLinkList = functions.https.onRequest(async (req, res) => {
         handleResponse(req, res, { status: "error", "msg": err.msg ? { detail: err.message } : err }, 500);
     }
 })
+
+exports.getDashBoardStats = functions.https.onRequest(async (req, res) => {
+    try {
+        const validateSchema = () =>
+            joi.object({
+                uid: joi.string().required(),
+                token: joi.string().required()
+            }).required();
+        const { uid, token } = mustValidate(validateSchema(), req.body)
+        const session = await checkSessions(token, uid);
+        if (!session) {
+            handleResponse(req, res, { status: "error", "msg": "Session Expired" }, 401)
+            return
+        }
+        const linksDb = config.getLinkInfoDb();
+        const usersDb = config.getUsersDb();
+        const challengesInstanceDb = config.getChallengeInstancesDb();
+
+        let  no_users, no_challenges, no_links, no_clicked_links ;
+        await usersDb.once("value", snapshot => {
+           no_users= snapshot.numChildren();
+        })
+        await linksDb.once("value", snapshot => {
+            no_links= snapshot.numChildren();
+        })
+        await challengesInstanceDb.once("value", snapshot => {
+            no_challenges= snapshot.numChildren()
+        })
+
+        await linksDb.orderByChild("isUsed").equalTo(true).once("value", snapshot => {
+            no_clicked_links=snapshot.numChildren()
+        })
+        handleResponse(req, res, {"noUsers": no_users, "noChallenges": no_challenges, "noLinks" : no_links, "noClickedLinks" : no_clicked_links});
+    } catch (err) {
+        logger.log(err)
+        handleResponse(req, res, { status: "error", "msg": err.msg ? {detail: err.message } : err }, 500)
+        
+    }
+
+})
