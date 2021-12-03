@@ -2,6 +2,7 @@ const functions = require("firebase-functions");
 const _ = require('loadsh');
 const admin = require("firebase-admin");
 const joi = require("joi");
+const { nanoid, customAlphabet } = require("nanoid");
 
 const root = admin.database();
 
@@ -143,6 +144,7 @@ exports.getScore = functions.https.onRequest(async (req, res, next) => {
         var result = await scoresDb.push(newScore).getKey();
         handleResponse(req, res, { "scoreId": result, "net score": score, "percentage": percentage,"shareCode": newScore.shareCode });
     } catch (err) {
+        logger.log("Error with score")
         logger.log(err);
         handleResponse(req, res, { status: "error", "msg": err.msg ? { detail: err.message } : err }, 500)
     }
