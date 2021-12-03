@@ -256,8 +256,8 @@ exports.addScoreForPlayTogether = functions.https.onRequest(async (req, res) => 
         const validateSchema = () =>
             joi.object({
                 respondentId: joi.string().required(),
-                netScore: joi.string().required(),
-                percentage: joi.string().required()
+                netScore: joi.number().required(),
+                percentage: joi.number().required()
             }).required()
         const { respondentId, netScore, percentage } = mustValidate(validateSchema(), req.body);
 
@@ -276,10 +276,12 @@ exports.addScoreForPlayTogether = functions.https.onRequest(async (req, res) => 
             respondentId: respondentId,
             netScore: netScore,
             percentage: percentage,
-            timeStamp: Date.now()
+            timeStamp: Date.now(),
+            shareCode: generateRandomNumber(),
         }
         var result = await scoresDb.push(newScore).getKey();
-        handleResponse(req, res, { "scoreId": result, "net score": score, "percentage": percentage });
+
+        handleResponse(req, res, { "scoreId": result, "net score": netScore, "percentage": percentage,"shareCode": newScore.shareCode });
     } catch (err) {
         logger.log(err);
         handleResponse(req, res, { status: "error", "msg": err.msg ? { detail: err.message } : err }, 500)
