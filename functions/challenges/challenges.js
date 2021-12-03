@@ -12,6 +12,8 @@ const handleResponse = require("../utils/handleResponse");
 const ErrorWithDetail = require("../utils/ErrorWithDetail");
 const sendSms = require("../utils/SendSms");
 const config = require("../utils/config");
+const TinyURL = require('tinyurl');
+
 
 exports.createChallangeInstance = functions.https.onRequest(async (req, res) => {
     try {
@@ -169,24 +171,25 @@ exports.onChallengeCreated = functions.https.onRequest(async (req, res) => {
         }
         user = JSON.parse(JSON.stringify(doesUserExist));
         var smsTo = user.phone_number
-        var smsBody = createSmsBodyHelper(challengeInstanceId, user.name)
-        //testing purpose
-        try {
-            await sendSms(smsTo, smsBody);
-        } catch (err) { }
+        var smsBody = await createSmsBodyHelper(challengeInstanceId, user.name)
+        await sendSms(smsTo, smsBody);
         var link = process.env.FORNT_END_URL + "?challenge=" + challengeInstanceId
-   
-        handleResponse(req, res, { "message": link});
+
+        link = await TinyURL.shorten(link)
+        logger.log(link)
+        handleResponse(req, res, { "message": link });
     } catch (err) {
         logger.log(err);
         handleResponse(req, res, { status: "error", "msg": err.msg ? { detail: err.message } : err }, 500)
     }
 })
 
-function createSmsBodyHelper(challangeInstanceId, challangerName) {
-    var body = challangerName + " has prepared your trivial quiz Go to "
+async function createSmsBodyHelper(challangeInstanceId, challangerName) {
+    var body = challangerName + " has prepared your trivial quiz. Go to "
     var link = process.env.FORNT_END_URL + "?challenge=" + challangeInstanceId
-    body = body + link + " to Complete your Challange!";
+
+    link = await TinyURL.shorten(link)
+    body = body + link + " to complete the challenge!";
     return body;
 }
 
