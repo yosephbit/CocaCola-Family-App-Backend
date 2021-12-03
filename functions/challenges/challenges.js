@@ -170,8 +170,13 @@ exports.onChallengeCreated = functions.https.onRequest(async (req, res) => {
         user = JSON.parse(JSON.stringify(doesUserExist));
         var smsTo = user.phone_number
         var smsBody = createSmsBodyHelper(challengeInstanceId, user.name)
-        await sendSms(smsTo, smsBody);
-        handleResponse(req, res, { "message": smsBody.toString() });
+        //testing purpose
+        try {
+            await sendSms(smsTo, smsBody);
+        } catch (err) { }
+        var link = process.env.FORNT_END_URL + "?challenge=" + challengeInstanceId
+   
+        handleResponse(req, res, { "message": link});
     } catch (err) {
         logger.log(err);
         handleResponse(req, res, { status: "error", "msg": err.msg ? { detail: err.message } : err }, 500)
