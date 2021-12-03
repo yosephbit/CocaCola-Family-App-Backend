@@ -88,3 +88,5 @@ exports.getUsersList = users.getUsersList;
 exports.getLinksList = adminUsers.adminLinkList;
 
 exports.getScoresList = questions.getScoresList;
+
+exports.getQuestionsList = questions.getQuestionsList;

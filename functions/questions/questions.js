@@ -578,6 +578,35 @@ exports.getScoresList = functions.https.onRequest(async (req, res) => {
         handleResponse(req, res, { status: "error", "msg": err.msg ? { detail: err.message } : err }, 500);
     }
 })
+exports.getQuestionsList = functions.https.onRequest(async (req, res) => {
+    try {
+        
+        const validateSchema = () =>
+            joi.object({
+                page: joi.number().required(),
+                itemsPerPage: joi.number().required(),
+                uid: joi.string().required(),
+                token: joi.string().required()
+            }).required();
+        const { page, itemsPerPage, uid, token } = mustValidate(validateSchema(), req.body)
+        const session = await checkSessions(token, uid);
+        if (!session) {
+            handleResponse(req, res, { status: "error", "msg": "Sessions Expired" }, 401)
+            return
+        }
+        
+        const getQuestionsDb = config.getQuestionsDb()
+        var questions = await (await getQuestionsDb.orderByKey().get()).val();
+        questions = Object.entries(questions)
+        var startAt = page * itemsPerPage
+        var endAt = startAt + itemsPerPage
+        questions = questions.slice(startAt, endAt)
+        handleResponse(req, res, questions)
+    } catch (err) {
+        logger.log(err);
+        handleResponse(req, res, { status: "error", "msg": err.msg ? { detail: err.message } : err }, 500);
+    }
+})
 
 function generateRandomNumber() {
     const nanoid = customAlphabet("0123456789", 6);
