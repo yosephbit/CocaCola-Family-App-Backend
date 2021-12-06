@@ -3,9 +3,12 @@ const _ = require('loadsh');
 const admin = require("firebase-admin");
 const joi = require("joi");
 const { nanoid, customAlphabet } = require("nanoid");
+const formidable = require("formidable-serverless");
 
 const root = admin.database();
 
+
+const uploadFile = require('../utils/uploadFile')
 const logger = require("../utils/Logger");
 const { mustValidate } = require("../utils/validation");
 const handleResponse = require("../utils/handleResponse");
@@ -37,7 +40,7 @@ exports.addAnswers = functions.https.onRequest(async (req, res) => {
 
         if (respondentExists === null) {
             handleResponse(req, res, { status: "error", "msg": "respondant Id not found" }, 404)
-            return 
+            return
         }
         if (questionExists === null) {
 
@@ -51,7 +54,7 @@ exports.addAnswers = functions.https.onRequest(async (req, res) => {
         }
         if (challangeInstanceExists === null) {
             handleResponse(req, res, { status: "error", "msg": "Challenge Id not found" }, 404)
-            return 
+            return
         }
 
         answer = {
@@ -74,12 +77,34 @@ exports.addAnswers = functions.https.onRequest(async (req, res) => {
 
 exports.getScore = functions.https.onRequest(async (req, res, next) => {
     try {
+
+        var form = new formidable.IncomingForm();
+        let link;
+        let bodyParams;
+        await new Promise((resolve, reject) => {
+            form.parse(req, async (err, fields, files) => {
+                try {
+                    bodyParams = fields;
+                    link = await uploadFile.uploadFile(files)
+                    resolve()
+                } catch (e) {
+                    console.log(e)
+                    link = false;
+                    reject()
+                }
+            });
+        })
         const validateSchema = () =>
             joi.object({
                 challangeId: joi.string().required(),
                 respondentId: joi.string().required()
             }).required()
-        const { respondentId, challangeId } = mustValidate(validateSchema(), req.body);
+        const { respondentId, challangeId } = mustValidate(validateSchema(), bodyParams);
+
+        //const link = await uploadFile.uploadFile(req)
+        if (link === false) {
+            throw new ErrorWithDetail("Something went wrong uploading file", "upload")
+        }
 
         const usersDb = config.getUsersDb();
         const challengesDb = config.getChalllengesDb();
@@ -90,7 +115,7 @@ exports.getScore = functions.https.onRequest(async (req, res, next) => {
 
         if (respondantExists === null) {
             handleResponse(req, res, { status: "error", "msg": "respondandt Id not found" }, 401)
-            return 
+            return
         }
 
         var responses;
@@ -99,8 +124,8 @@ exports.getScore = functions.https.onRequest(async (req, res, next) => {
                 responses = snapshot.val();
             } else {
                 handleResponse(req, res, { status: "error", "msg": "Challenger Id not found" }, 401)
-                return 
-           
+                return
+
             }
         });
         responses = Object.entries(responses);
@@ -139,14 +164,15 @@ exports.getScore = functions.https.onRequest(async (req, res, next) => {
             percentage: percentage,
             timeStamp: Date.now(),
             shareCode: generateRandomNumber(),
+            link: link
 
         }
         var result = await scoresDb.push(newScore).getKey();
-        handleResponse(req, res, { "scoreId": result, "net score": score, "percentage": percentage,"shareCode": newScore.shareCode });
+        handleResponse(req, res, { "scoreId": result, "net score": score, "percentage": percentage, "shareCode": newScore.shareCode });
     } catch (err) {
         logger.log("Error with score")
         logger.log(err);
-        handleResponse(req, res, { status: "error", "msg": err.msg ? { detail: err.message } : err }, 500)
+        handleResponse(req, res, { status: "error", "msg": err?.msg ? { detail: err.message } : err }, 500)
     }
 })
 
@@ -167,7 +193,7 @@ exports.getQuiz = functions.https.onRequest(async (req, res) => {
         //questions=JSON.stringify(questions);
         if (questions.length < numberOfQuestions) {
             handleResponse(req, res, { status: "error", "msg": "Number of questions is too high" }, 404)
-            return 
+            return
         }
         randmizedQuestions = shuffleArray(questions)
         randmizedQuestions = randmizedQuestions.slice(0, numberOfQuestions)
@@ -214,7 +240,7 @@ exports.getSingleQuestion = functions.https.onRequest(async (req, res) => {
         var questionExists = await (await questionsDb.child(questionId).get()).val();
         if (questionExists === null) {
             handleResponse(req, res, { status: "error", "msg": "Question Id not found" }, 404)
-            return 
+            return
         }
         //only for pretty json
         var question = questionExists;
@@ -253,17 +279,38 @@ exports.getSingleScoreById = functions.https.onRequest(async (req, res) => {
 })
 exports.addScoreForPlayTogether = functions.https.onRequest(async (req, res) => {
     try {
+
+        var form = new formidable.IncomingForm();
+        let link;
+        let bodyParams;
+        await new Promise((resolve, reject) => {
+            form.parse(req, async (err, fields, files) => {
+                try {
+                    bodyParams = fields;
+                    link = await uploadFile.uploadFile(files)
+                    resolve()
+                } catch (e) {
+                    console.log(e)
+                    link = false;
+                    reject()
+                }
+            });
+        })
         const validateSchema = () =>
             joi.object({
                 respondentId: joi.string().required(),
                 netScore: joi.number().required(),
                 percentage: joi.number().required()
             }).required()
-        const { respondentId, netScore, percentage } = mustValidate(validateSchema(), req.body);
+        const { respondentId, netScore, percentage } = mustValidate(validateSchema(), bodyParams);
 
         const usersDb = config.getUsersDb();
         const scoresDb = config.getScoresDb();
 
+        if (link === false) {
+            throw new ErrorWithDetail("Something went wrong uploading file", "upload")
+        }
+        
         var respondantExists = await (await usersDb.child(respondentId).get()).val();
 
         if (respondantExists === null) {
@@ -278,10 +325,11 @@ exports.addScoreForPlayTogether = functions.https.onRequest(async (req, res) => 
             percentage: percentage,
             timeStamp: Date.now(),
             shareCode: generateRandomNumber(),
+            link: link
         }
         var result = await scoresDb.push(newScore).getKey();
 
-        handleResponse(req, res, { "scoreId": result, "net score": netScore, "percentage": percentage,"shareCode": newScore.shareCode });
+        handleResponse(req, res, { "scoreId": result, "net score": netScore, "percentage": percentage, "shareCode": newScore.shareCode });
     } catch (err) {
         logger.log(err);
         handleResponse(req, res, { status: "error", "msg": err.msg ? { detail: err.message } : err }, 500)
@@ -584,7 +632,7 @@ exports.getScoresList = functions.https.onRequest(async (req, res) => {
 })
 exports.getQuestionsList = functions.https.onRequest(async (req, res) => {
     try {
-        
+
         const validateSchema = () =>
             joi.object({
                 page: joi.number().required(),
@@ -598,7 +646,7 @@ exports.getQuestionsList = functions.https.onRequest(async (req, res) => {
             handleResponse(req, res, { status: "error", "msg": "Sessions Expired" }, 401)
             return
         }
-        
+
         const getQuestionsDb = config.getQuestionsDb()
         var questions = await (await getQuestionsDb.orderByKey().get()).val();
         questions = Object.entries(questions)

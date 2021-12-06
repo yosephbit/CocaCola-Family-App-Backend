@@ -3,9 +3,11 @@ const _ = require('loadsh');
 const admin = require("firebase-admin");
 const joi = require("joi");
 const dotenv = require("dotenv").config();
+const formidable = require("formidable-serverless");
 
 const root = admin.database();
 
+const uploadFile = require('../utils/uploadFile')
 const logger = require("../utils/Logger");
 const { mustValidate } = require("../utils/validation");
 const handleResponse = require("../utils/handleResponse");
@@ -17,12 +19,33 @@ const TinyURL = require('tinyurl');
 
 exports.createChallangeInstance = functions.https.onRequest(async (req, res) => {
     try {
+
+        var form = new formidable.IncomingForm();
+        let link;
+        let bodyParams;
+        await new Promise((resolve, reject) => {
+            form.parse(req, async (err, fields, files) => {
+                try {
+                    bodyParams = fields;
+                    link = await uploadFile.uploadFile(files)
+                    resolve()
+                } catch (e) {
+                    console.log(e)
+                    link = false;
+                    reject()
+                }
+            });
+        })
         const validateSchema = () =>
             joi.object({
                 challangerId: joi.string().required(),
                 invitationId: joi.string().required()
             }).required();
-        const { invitationId,challangerId } = mustValidate(validateSchema(), req.body);
+        const { invitationId,challangerId } = mustValidate(validateSchema(), bodyParams);
+        
+        if (link === false) {
+            throw new ErrorWithDetail("Something went wrong uploading file", "upload")
+        }
         const challangeInstance = {
             challangerId: challangerId,
             invitationId: invitationId,
@@ -34,7 +57,7 @@ exports.createChallangeInstance = functions.https.onRequest(async (req, res) => 
         const challangeInstanceId = challengeInstanceDb.push(challangeInstance).getKey();
         handleResponse(req, res, { challangeInstanceId })
     } catch (err) {
-        logger.log(error)
+        logger.log(err)
         handleResponse(req, res, { status: "error", "msg": err.msg ? { detail: err.message } : err },500)
     }
 })
@@ -155,7 +178,7 @@ exports.onChallengeCreated = functions.https.onRequest(async (req, res) => {
                 challengeInstanceId: joi.string().required()
             }).required()
         const { challengeInstanceId } = mustValidate(validateSchema(), req.body);
-
+        
         const linkInfoDB = config.getLinkInfoDb();
         const challengeInstanceDb = config.getChallengeInstancesDb();
 
