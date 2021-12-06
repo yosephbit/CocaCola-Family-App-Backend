@@ -20,10 +20,12 @@ exports.createChallangeInstance = functions.https.onRequest(async (req, res) => 
         const validateSchema = () =>
             joi.object({
                 challangerId: joi.string().required(),
+                invitationId: joi.string().required()
             }).required();
-        const { challangerId } = mustValidate(validateSchema(), req.body);
+        const { invitationId,challangerId } = mustValidate(validateSchema(), req.body);
         const challangeInstance = {
             challangerId: challangerId,
+            invitationId: invitationId,
             timeStamp: Date.now()
         };
 
@@ -32,7 +34,8 @@ exports.createChallangeInstance = functions.https.onRequest(async (req, res) => 
         const challangeInstanceId = challengeInstanceDb.push(challangeInstance).getKey();
         handleResponse(req, res, { challangeInstanceId })
     } catch (err) {
-        handleResponse(req, res, { status: "error", "msg": err.msg ? { detail: err.message } : err },)
+        logger.log(error)
+        handleResponse(req, res, { status: "error", "msg": err.msg ? { detail: err.message } : err },500)
     }
 })
 exports.addChallange = functions.https.onRequest(async (req, res) => {
@@ -153,7 +156,7 @@ exports.onChallengeCreated = functions.https.onRequest(async (req, res) => {
             }).required()
         const { challengeInstanceId } = mustValidate(validateSchema(), req.body);
 
-
+        const linkInfoDB = config.getLinkInfoDb();
         const challengeInstanceDb = config.getChallengeInstancesDb();
 
         var challangeExists = await (await challengeInstanceDb.child(challengeInstanceId).get()).val();
@@ -169,9 +172,10 @@ exports.onChallengeCreated = functions.https.onRequest(async (req, res) => {
             handleResponse(req, res, { status: "error", "msg": "user not found" }, 401)
             return
         }
+        var relation= await (await linkInfoDB.child(challenge.invitationId).get()).val();
         user = JSON.parse(JSON.stringify(doesUserExist));
         var smsTo = user.phone_number
-        var smsBody = await createSmsBodyHelper(challengeInstanceId, user.name)
+        var smsBody = await createSmsBodyHelper(challengeInstanceId, relation.relation)
         await sendSms(smsTo, smsBody);
         var link = process.env.FORNT_END_URL + "?challenge=" + challengeInstanceId
 
@@ -185,7 +189,7 @@ exports.onChallengeCreated = functions.https.onRequest(async (req, res) => {
 })
 
 async function createSmsBodyHelper(challangeInstanceId, challangerName) {
-    var body = challangerName + " has prepared your trivial quiz. Go to "
+    var body = "your "+ challangerName + " has prepared your trivial quiz. Go to "
     var link = process.env.FORNT_END_URL + "?challenge=" + challangeInstanceId
 
     link = await TinyURL.shorten(link)
