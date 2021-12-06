@@ -269,11 +269,11 @@ exports.getSingleScoreById = functions.https.onRequest(async (req, res) => {
         }
         //only for pretty json
         var score = scoreExists;
-        handleResponse(req, res, { score });
+        handleResponse(req, res,  score );
 
     } catch (err) {
         logger.log(err);
-        handleResponse(req, res, { status: "error", "msg": err.msg ? { detail: err.message } : err },)
+        handleResponse(req, res, { status: "error", "msg": err.msg ? { detail: err.message } : err },500)
 
     }
 })
@@ -335,6 +335,7 @@ exports.addScoreForPlayTogether = functions.https.onRequest(async (req, res) => 
         handleResponse(req, res, { status: "error", "msg": err.msg ? { detail: err.message } : err }, 500)
     }
 })
+
 
 //helper functions
 function shuffleArray(array) {

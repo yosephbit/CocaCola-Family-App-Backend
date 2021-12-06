@@ -1,7 +1,8 @@
 const functions = require("firebase-functions");
 const admin = require('firebase-admin');
+const bodyParser = require("body-parser");
 
-let isUser =true;
+let isUser = true;
 
 admin.initializeApp();
 // Create and Deploy Your First Cloud Functions
@@ -14,16 +15,16 @@ const users = require('./users/users');
 const questions = require('./questions/questions');
 const challenges = require('./challenges/challenges');
 const auth = require('./auth/auth');
-const adminUsers =require('./admin/admin')
+const adminUsers = require('./admin/admin')
 const startupScript = require('./startupScript')
-
+const handleResponse = require('./utils/handleResponse')
 exports.helloWorld = functions.https.onRequest((request, response) => {
   logger.log("asd")
   response.send("Hello from Firebase!");
 });
-startupScript.createAdmin()
-startupScript.initializQuestionForTesting()
-startupScript.initializeUsers()
+// startupScript.createAdmin()
+// startupScript.initializQuestionForTesting()
+// startupScript.initializeUsers()
 
 exports.generateInviteLink = users.generateInviteLink;
 
@@ -46,36 +47,38 @@ exports.getQuiz = questions.getQuiz;
 
 exports.getScore = questions.getScore;
 
+exports.getSingleScoreById = questions.getSingleScoreById;
+
 exports.addScoreForPlayTogether = questions.addScoreForPlayTogether;
 
-exports.addMultipleQuestions =questions.addMultipleQuestions;
+exports.addMultipleQuestions = questions.addMultipleQuestions;
 
 exports.getSingleScoreById = questions.getSingleScoreById;
 
 //challange related 
 
-exports.addChallange = challenges.addChallange; 
+exports.addChallange = challenges.addChallange;
 
 exports.getChallenge = challenges.getChallenge;
 
 exports.createChallangeInstance = challenges.createChallangeInstance;
 
-exports.onChallengeCreated= challenges.onChallengeCreated;
+exports.onChallengeCreated = challenges.onChallengeCreated;
 
 //Authrization related
 
-exports.sendCode=auth.sendCode;
+exports.sendCode = auth.sendCode;
 
-exports.verifyToken=auth.verifyToken;
+exports.verifyToken = auth.verifyToken;
 
 
 //admin only
 
 exports.addAdmin = adminUsers.addAdmin;
 
-exports.adminLogin=adminUsers.adminLogin;
+exports.adminLogin = adminUsers.adminLogin;
 
-exports.addQuestion = questions.addQuestion; 
+exports.addQuestion = questions.addQuestion;
 
 exports.editQuestion = questions.editQuestion;
 
