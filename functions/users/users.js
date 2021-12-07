@@ -33,7 +33,7 @@ exports.generateInviteLink = functions.https.onRequest(async (req, res) => {
 
         var linkInfo = {
             inviterId: uid,
-            relation: relation,
+            relation: relation.toLowerCase(),
             isUsed: false,
             invitedId: ''
         };

@@ -2,6 +2,9 @@
     "rules":{
         "users":{
             ".indexOn":["phone_number"]
+        },
+        "questions": {
+            ".indexOn":["relation"]
         }
     }
 }

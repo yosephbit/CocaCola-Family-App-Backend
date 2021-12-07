@@ -69,12 +69,12 @@ exports.verifyToken = functions.https.onRequest(async (req, res) => {
         var userAuth = await (await userAuthDb.child(verificationId).get()).val()
 
         if (userAuth === null) {
-            handleResponse(req, res, { status: "error", "msg": "Verification Id not found" }, 401)
+            handleResponse(req, res, { status: "error", "msg": "Verification Id not found" }, 403)
             return
         }
         userAuth = JSON.parse(JSON.stringify(userAuth));
         if (userAuth.sms_token !== sms_token) {
-            handleResponse(req, res, { status: "error", "msg": "token mismatch" }, 401)
+            handleResponse(req, res, { status: "error", "msg": "token mismatch" }, 403)
             return
         }
         var phone_inuse = false;

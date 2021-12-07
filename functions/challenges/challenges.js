@@ -144,18 +144,20 @@ exports.getChallenge = functions.https.onRequest(async (req, res) => {
             var choice2 = await getQuestionsChoiceById(questionDetails?.answersId?.choiceID2);
 
             var questionFull = {
+                "relation": question[1].relation,
                 "question": {
-                    "questionId": question[1]?.questionId,
-                    "questionText": questionDetails?.questionText
+                    "questionId": question[0],
+                    "questionText": question[1].questionText,
+                    "challengeText": question[1].challengeText
                 },
                 "answers": {
                     "choice1": {
-                        "choiceId": questionDetails?.answersId?.choiceID1,
-                        "choiceText": choice1?.answersText
+                        "choiceId": question[1].answersId.choiceID1,
+                        "choiceText": choice1.answersText
                     },
                     "choice2": {
-                        "choiceId": questionDetails?.answersId?.choiceID2,
-                        "choiceText": choice2?.answersText
+                        "choiceId": question[1].answersId.choiceID2,
+                        "choiceText": choice2.answersText
                     },
                 }
             }

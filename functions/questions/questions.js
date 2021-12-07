@@ -168,7 +168,7 @@ exports.getScore = functions.https.onRequest(async (req, res, next) => {
 
         }
         var result = await scoresDb.push(newScore).getKey();
-        handleResponse(req, res, { "scoreId": result, "net score": score, "percentage": percentage, "shareCode": newScore.shareCode, link: [link] });
+        handleResponse(req, res, { "scoreId": result, "net score": score, "percentage": percentage, "shareCode": newScore.shareCode });
     } catch (err) {
         logger.log("Error with score")
         logger.log(err);
@@ -180,31 +180,41 @@ exports.getQuiz = functions.https.onRequest(async (req, res) => {
     try {
         const validateSchema = () =>
             joi.object({
-                numberOfQuestions: joi.number().required()
+                invitationId: joi.string().required()
             }).required()
 
-        const { numberOfQuestions } = mustValidate(validateSchema(), req.body);
-        const questionsDb = config.getQuestionsDb();
+        const { invitationId } = mustValidate(validateSchema(), req.body);
 
-        var questions = await (await questionsDb.orderByKey().get()).val();
+        const questionsDb = config.getQuestionsDb();
+        const linkInfoDb = config.getLinkInfoDb();
+        var relation;
+        if (invitationId.includes("TOGETHER")) {
+            relation=invitationId.split(':')[1].toLowerCase()
+        } else {
+            relation = (await linkInfoDb.child(invitationId).get()).val().relation;
+            if (!relation) {
+                throw new ErrorWithDetail("invalid Data ", "Link Id not found")
+            }
+        }
+        const numberOfQuestions = 5;
+        var questions = await (await questionsDb.orderByChild("relation").equalTo(relation).get()).val();
         questions = Object.entries(questions)
 
-        logger.log(questions.length)
         //questions=JSON.stringify(questions);
-        if (questions.length < numberOfQuestions) {
-            handleResponse(req, res, { status: "error", "msg": "Number of questions is too high" }, 404)
-            return
-        }
-        randmizedQuestions = shuffleArray(questions)
+        
+        randmizedQuestions = questions;
         randmizedQuestions = randmizedQuestions.slice(0, numberOfQuestions)
         quizeArray = []
         for (const question of randmizedQuestions) {
             var choice1 = await getQuestionsChoiceById(question[1].answersId.choiceID1);
             var choice2 = await getQuestionsChoiceById(question[1].answersId.choiceID2);
+            console.log(question)
             var questionFull = {
+                "relation": question[1].relation,
                 "question": {
                     "questionId": question[0],
-                    "questionText": question[1].questionText
+                    "questionText": question[1].questionText,
+                    "challengeText": question[1].challengeText
                 },
                 "answers": {
                     "choice1": {
@@ -222,7 +232,7 @@ exports.getQuiz = functions.https.onRequest(async (req, res) => {
         }
         handleResponse(req, res, { questions: quizeArray });
     } catch (err) {
-        logger.log(err)
+        console.log(err)
         handleResponse(req, res, { status: "error", "msg": err.msg ? { detail: err.message } : err }, 500)
     }
 })
@@ -261,7 +271,6 @@ exports.getSingleScoreById = functions.https.onRequest(async (req, res) => {
         const { scoreId } = mustValidate(validateSchema(), req.body);
 
         const scoresDb = config.getScoresDb();
-        const challengeInstanceDb = config.getChallengeInstancesDb()
 
         var scoreExists = await (await scoresDb.child(scoreId).get()).val();
         if (scoreExists === null) {
@@ -270,35 +279,11 @@ exports.getSingleScoreById = functions.https.onRequest(async (req, res) => {
         }
         //only for pretty json
         var score = scoreExists;
-        if (!score.challangeId) {
-            var newScore = {
-                challangeId: score.challangeId,
-                respondentId: score.respondentId,
-                netScore: score.netScore,
-                percentage: score.percentage,
-                timeStamp: score.timeStamp,
-                shareCode: score.shareCode,
-                videos: [score.link]
-
-            }
-        } else {
-            var link1=(await challengeInstanceDb.child(score.challangeId).get()).val().link
-            var newScore = {
-                challangeId: score.challangeId,
-                respondentId: score.respondentId,
-                netScore: score.netScore,
-                percentage: score.percentage,
-                timeStamp: score.timeStamp,
-                shareCode: score.shareCode,
-                videos: [score.link, link1]
-
-            }
-        }
-        handleResponse(req, res, newScore);
+        handleResponse(req, res,  score );
 
     } catch (err) {
         logger.log(err);
-        handleResponse(req, res, { status: "error", "msg": err.msg ? { detail: err.message } : err }, 500)
+        handleResponse(req, res, { status: "error", "msg": err.msg ? { detail: err.message } : err },500)
 
     }
 })
@@ -335,7 +320,7 @@ exports.addScoreForPlayTogether = functions.https.onRequest(async (req, res) => 
         if (link === false) {
             throw new ErrorWithDetail("Something went wrong uploading file", "upload")
         }
-
+        
         var respondantExists = await (await usersDb.child(respondentId).get()).val();
 
         if (respondantExists === null) {
@@ -354,7 +339,7 @@ exports.addScoreForPlayTogether = functions.https.onRequest(async (req, res) => 
         }
         var result = await scoresDb.push(newScore).getKey();
 
-        handleResponse(req, res, { "scoreId": result, "net score": netScore, "percentage": percentage, "shareCode": newScore.shareCode, "videos": [link] });
+        handleResponse(req, res, { "scoreId": result, "net score": netScore, "percentage": percentage, "shareCode": newScore.shareCode });
     } catch (err) {
         logger.log(err);
         handleResponse(req, res, { status: "error", "msg": err.msg ? { detail: err.message } : err }, 500)
@@ -513,9 +498,11 @@ exports.addMultipleQuestions = functions.https.onRequest(async (req, res) => {
                 answersText: question.answers.choice2.choiceText
             }
             var choiceID2 = choiceDb.push(answer).getKey();
-
+            console.log(question.question.challengeText)
             var availableAnswers = {
                 questionText: question.question.questionText,
+                challengeText: question.question.challengeText,
+                relation: question.relation.toString().toLowerCase(),
                 answersId: {
                     choiceID1: choiceID1,
                     choiceID2: choiceID2
