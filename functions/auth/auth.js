@@ -87,13 +87,12 @@ exports.verifyToken = functions.https.onRequest(async (req, res) => {
             if (snapshot.exists()) {
                 phone_inuse = true;
                 result = Object.keys(snapshot.val())[0];
-                config.getUsersDb().child(result).push(user)
-                user=result
                 return
             }
         })
 
         if (phone_inuse) {
+            config.getUsersDb().child(result).set(user)
             handleResponse(req, res, { uid: user })
             return;
         }
