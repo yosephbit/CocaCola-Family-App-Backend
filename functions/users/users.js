@@ -18,7 +18,7 @@ exports.generateInviteLink = functions.https.onRequest(async (req, res) => {
         const validateSchema = () =>
             joi.object({
                 uid: joi.string().required(),
-                relation: joi.string().valid('GrandFather', 'GrandMother', 'Mother', 'Father', 'Son', 'Daughter').required(),
+                relation: joi.string().required(),
             }).required();
 
         const { uid, relation } = mustValidate(validateSchema(), req.body);

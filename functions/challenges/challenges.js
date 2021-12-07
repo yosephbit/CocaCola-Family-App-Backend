@@ -191,14 +191,15 @@ exports.onChallengeCreated = functions.https.onRequest(async (req, res) => {
             return
         }
         challenge = JSON.parse(JSON.stringify(challangeExists));
-        var uid = challenge.challangerId;
+        
+        var relation = await (await linkInfoDB.child(challenge.invitationId).get()).val();
+        
         const usersDb = config.getUsersDb()
-        var doesUserExist = await (await usersDb.child(uid).get()).val();
+        var doesUserExist = await (await usersDb.child(relation.inviterId).get()).val();
         if (doesUserExist === null) {
             handleResponse(req, res, { status: "error", "msg": "user not found" }, 401)
             return
         }
-        var relation= await (await linkInfoDB.child(challenge.invitationId).get()).val();
         user = JSON.parse(JSON.stringify(doesUserExist));
         var smsTo = user.phone_number
         var smsBody = await createSmsBodyHelper(challengeInstanceId, relation.relation)

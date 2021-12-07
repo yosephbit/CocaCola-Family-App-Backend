@@ -180,7 +180,368 @@
                     "choiceText": "Pot-luck"
                 }
             }
+        },
+        {
+            "relation" : "dad",
+            "question": {
+                "questionId": "-MpNZy9kaT6hlVBaaCyY",
+                "questionText": "Best CNY gift for me is:",
+                "challengeText" : "Best CNY gift for dad is:"
+            },
+            "answers": {
+                "choice1": {
+                    "choiceId": "-MpN_LlE5igfauaHWvPa",
+                    "choiceText": "Winning the CNY lottery"
+                },
+                "choice2": {
+                    "choiceId": "-MpN_Qvpz-eoWy8PvYqY",
+                    "choiceText": "Less Nagging"
+                }
+            }
+        },
+        {
+            "relation" : "dad",
+            "question": {
+                "questionId": "-MpNZy9kaT6hlVBaaCyY",
+                "questionText": "I smile the most on CNY when:",
+                "challengeText" : "Dad smiles the most on CNY when:" 
+            },
+            "answers": {
+                "choice1": {
+                    "choiceId": "-MpN_LlE5igfauaHWvPa",
+                    "choiceText": "Giving angpow"
+                },
+                "choice2": {
+                    "choiceId": "-MpN_Qvpz-eoWy8PvYqY",
+                    "choiceText": "Receiving angpow"
+                }
+            }
+        },
+        {
+            "relation" : "dad",
+            "question": {
+                "questionId": "-MpNZy9kaT6hlVBaaCyY",
+                "questionText": "Which is more fun for me on CNY? ",
+                "challengeText" : "Which is more fun for your Dad on CNY?"
+            },
+            "answers": {
+                "choice1": {
+                    "choiceId": "-MpN_LlE5igfauaHWvPa",
+                    "choiceText": "Chatting with uncles"
+                },
+                "choice2": {
+                    "choiceId": "-MpN_Qvpz-eoWy8PvYqY",
+                    "choiceText": "Playing Mahjong"
+                }
+            }
+        },
+        {
+            "relation" : "dad",
+            "question": {
+                "questionId": "-MpNZy9kaT6hlVBaaCyY",
+                "questionText": "Tshebest praise for me during CNY is:",
+                "challengeText" : "The best praise for your dad during CNY is:"
+            },
+            "answers": {
+                "choice1": {
+                    "choiceId": "-MpN_LlE5igfauaHWvPa",
+                    "choiceText": "Still so young!"
+                },
+                "choice2": {
+                    "choiceId": "-MpN_Qvpz-eoWy8PvYqY",
+                    "choiceText": "Still so fit!"
+                }
+            }
+        },
+        {
+            "relation" : "dad",
+            "question": {
+                "questionId": "-MpNZy9kaT6hlVBaaCyY",
+                "questionText": "Which snack do I like more:",
+                "challengeText" : "Which snack does Dad like more:"
+            },
+            "answers": {
+                "choice1": {
+                    "choiceId": "-MpN_LlE5igfauaHWvPa",
+                    "choiceText": "Bak Kwa"
+                },
+                "choice2": {
+                    "choiceId": "-MpN_Qvpz-eoWy8PvYqY",
+                    "choiceText": "Pineapple Tart"
+                }
+            }
+        },
+        {
+            "relation" : "mum",
+            "question": {
+                "questionId": "-MpNZy9kaT6hlVBaaCyY",
+                "questionText": "Best CNY gift for me is:",
+                "challengeText" : "Best CNY gift for mum is:"
+            },
+            "answers": {
+                "choice1": {
+                    "choiceId": "-MpN_LlE5igfauaHWvPa",
+                    "choiceText": "More Ang Bao"
+                },
+                "choice2": {
+                    "choiceId": "-MpN_Qvpz-eoWy8PvYqY",
+                    "choiceText": "Quality time with family"
+                }
+            }
+        },
+        {
+            "relation" : "mum",
+            "question": {
+                "questionId": "-MpNZy9kaT6hlVBaaCyY",
+                "questionText": "I loves it the most when my kids:",
+                "challengeText" : "Mum loves it the most when you:" 
+            },
+            "answers": {
+                "choice1": {
+                    "choiceId": "-MpN_LlE5igfauaHWvPa",
+                    "choiceText": "help with spring cleaning "
+                },
+                "choice2": {
+                    "choiceId": "-MpN_Qvpz-eoWy8PvYqY",
+                    "choiceText": "help with CNY decoration"
+                }
+            }
+        },
+        {
+            "relation" : "mum",
+            "question": {
+                "questionId": "-MpNZy9kaT6hlVBaaCyY",
+                "questionText": "I smile most on CNY when:",
+                "challengeText" : "Mum smiles most on CNY when:"
+            },
+            "answers": {
+                "choice1": {
+                    "choiceId": "-MpN_LlE5igfauaHWvPa",
+                    "choiceText": "Giving angpow"
+                },
+                "choice2": {
+                    "choiceId": "-MpN_Qvpz-eoWy8PvYqY",
+                    "choiceText": "Receiving angpow"
+                }
+            }
+        },
+        {
+            "relation" : "mum",
+            "question": {
+                "questionId": "-MpNZy9kaT6hlVBaaCyY",
+                "questionText": "The best praise for me during CNY is:",
+                "challengeText" : "The best praise for your mum during CNY is:"
+            },
+            "answers": {
+                "choice1": {
+                    "choiceId": "-MpN_LlE5igfauaHWvPa",
+                    "choiceText": "Excellent cooking!"
+                },
+                "choice2": {
+                    "choiceId": "-MpN_Qvpz-eoWy8PvYqY",
+                    "choiceText": "Nice CNY dress!"
+                }
+            }
+        },
+        {
+            "relation" : "mum",
+            "question": {
+                "questionId": "-MpNZy9kaT6hlVBaaCyY",
+                "questionText": "Which snack do I like more:",
+                "challengeText" : "Which snack does mum like more:"
+            },
+            "answers": {
+                "choice1": {
+                    "choiceId": "-MpN_LlE5igfauaHWvPa",
+                    "choiceText": "Bak Kwa"
+                },
+                "choice2": {
+                    "choiceId": "-MpN_Qvpz-eoWy8PvYqY",
+                    "choiceText": "Pineapple Tart"
+                }
+            }
+        },
+        {
+            "relation" : "son",
+            "question": {
+                "questionId": "-MpNZy9kaT6hlVBaaCyY",
+                "questionText": "What do you like about CNY:",
+                "challengeText" : "What does your Son like about CNY:"
+            },
+            "answers": {
+                "choice1": {
+                    "choiceId": "-MpN_LlE5igfauaHWvPa",
+                    "choiceText": "All the food!"
+                },
+                "choice2": {
+                    "choiceId": "-MpN_Qvpz-eoWy8PvYqY",
+                    "choiceText": "No need to sweep the floor"
+                }
+            }
+        },
+        {
+            "relation" : "son",
+            "question": {
+                "questionId": "-MpNZy9kaT6hlVBaaCyY",
+                "questionText": "What's the best CNY gift for you?",
+                "challengeText" : "What's the best CNY gift for your Son?" 
+            },
+            "answers": {
+                "choice1": {
+                    "choiceId": "-MpN_LlE5igfauaHWvPa",
+                    "choiceText": "More Ang Bao "
+                },
+                "choice2": {
+                    "choiceId": "-MpN_Qvpz-eoWy8PvYqY",
+                    "choiceText": "Less Nagging"
+                }
+            }
+        },
+        {
+            "relation" : "son",
+            "question": {
+                "questionId": "-MpNZy9kaT6hlVBaaCyY",
+                "questionText": "Which is more fun for your Son on CNY?: ",
+                "challengeText" : "Which is more fun for you on CNY?"
+            },
+            "answers": {
+                "choice1": {
+                    "choiceId": "-MpN_LlE5igfauaHWvPa",
+                    "choiceText": "Family meals "
+                },
+                "choice2": {
+                    "choiceId": "-MpN_Qvpz-eoWy8PvYqY",
+                    "choiceText": "Chat with Cousins"
+                }
+            }
+        },
+        {
+            "relation" : "son",
+            "question": {
+                "questionId": "-MpNZy9kaT6hlVBaaCyY",
+                "questionText": "What excites you the most during CNY?",
+                "challengeText" : "What excites your Son the most during CNY?"
+            },
+            "answers": {
+                "choice1": {
+                    "choiceId": "-MpN_LlE5igfauaHWvPa",
+                    "choiceText": "Buying new clothes"
+                },
+                "choice2": {
+                    "choiceId": "-MpN_Qvpz-eoWy8PvYqY",
+                    "choiceText": "Getting Ang Bao"
+                }
+            }
+        },
+        {
+            "relation" : "son",
+            "question": {
+                "questionId": "-MpNZy9kaT6hlVBaaCyY",
+                "questionText": "What is more difficult for you during CNY:",
+                "challengeText" : "What is more difficult for your Son during CNY:"
+            },
+            "answers": {
+                "choice1": {
+                    "choiceId": "-MpN_LlE5igfauaHWvPa",
+                    "choiceText": "Spring Cleaning"
+                },
+                "choice2": {
+                    "choiceId": "-MpN_Qvpz-eoWy8PvYqY",
+                    "choiceText": "Remembering the Chinese greetings"
+                }
+            }
+        },
+        {
+            "relation" : "daughter",
+            "question": {
+                "questionId": "-MpNZy9kaT6hlVBaaCyY",
+                "questionText": "What do you like about CNY:",
+                "challengeText" : "What does your Daughter like about CNY:"
+            },
+            "answers": {
+                "choice1": {
+                    "choiceId": "-MpN_LlE5igfauaHWvPa",
+                    "choiceText": "Angpows!"
+                },
+                "choice2": {
+                    "choiceId": "-MpN_Qvpz-eoWy8PvYqY",
+                    "choiceText": "CNY goodie snacks!"
+                }
+            }
+        },
+        {
+            "relation" : "daughter",
+            "question": {
+                "questionId": "-MpNZy9kaT6hlVBaaCyY",
+                "questionText": "Which is more fun for you on CNY:",
+                "challengeText" : "Which is more fun for your Daughter on CNY:" 
+            },
+            "answers": {
+                "choice1": {
+                    "choiceId": "-MpN_LlE5igfauaHWvPa",
+                    "choiceText": "Family meals "
+                },
+                "choice2": {
+                    "choiceId": "-MpN_Qvpz-eoWy8PvYqY",
+                    "choiceText": "Chat with Cousins"
+                }
+            }
+        },
+        {
+            "relation" : "daughter",
+            "question": {
+                "questionId": "-MpNZy9kaT6hlVBaaCyY",
+                "questionText": "What excites you the most during CNY?",
+                "challengeText" : "What excites your Daughter the most during CNY?"
+            },
+            "answers": {
+                "choice1": {
+                    "choiceId": "-MpN_LlE5igfauaHWvPa",
+                    "choiceText": "Buying new clothes"
+                },
+                "choice2": {
+                    "choiceId": "-MpN_Qvpz-eoWy8PvYqY",
+                    "choiceText": "Getting Ang Bao"
+                }
+            }
+        },
+        {
+            "relation" : "daughter",
+            "question": {
+                "questionId": "-MpNZy9kaT6hlVBaaCyY",
+                "questionText": "The best praise for me during CNY is:",
+                "challengeText" : "The best praise for your daughter during CNY is:"
+            },
+            "answers": {
+                "choice1": {
+                    "choiceId": "-MpN_LlE5igfauaHWvPa",
+                    "choiceText": "You lost weight"
+                },
+                "choice2": {
+                    "choiceId": "-MpN_Qvpz-eoWy8PvYqY",
+                    "choiceText": "You got prettier!"
+                }
+            }
+        },
+        {
+            "relation" : "daughter",
+            "question": {
+                "questionId": "-MpNZy9kaT6hlVBaaCyY",
+                "questionText": "Which CNY snack do you like more?",
+                "challengeText" : "Which CNY snack does your daughter like more:"
+            },
+            "answers": {
+                "choice1": {
+                    "choiceId": "-MpN_LlE5igfauaHWvPa",
+                    "choiceText": "Bak Kwa"
+                },
+                "choice2": {
+                    "choiceId": "-MpN_Qvpz-eoWy8PvYqY",
+                    "choiceText": "Prawn Roll"
+                }
+            }
         }
+
 
     ]
 }
