@@ -27,7 +27,7 @@ exports.sendCode = functions.https.onRequest(async (req, res) => {
 
         const userAuthDb = config.getAuthDb();
         _phone_number = phone_number;
-        if (phone_number.includes('a')) {
+        if (phone_number.includes('-')) {
             var _phone_number = '+251' + phone_number.substr(4, 10);
         }
         sms_token = generateRandomNumber();
@@ -86,8 +86,9 @@ exports.verifyToken = functions.https.onRequest(async (req, res) => {
         await config.getUsersDb().orderByChild("phone_number").equalTo(userAuth.phone_number).once("value", snapshot => {
             if (snapshot.exists()) {
                 phone_inuse = true;
-                user = Object.keys(snapshot.val())[0];
-
+                result = Object.keys(snapshot.val())[0];
+                config.getUsersDb().child(result).push(user)
+                user=result
                 return
             }
         })

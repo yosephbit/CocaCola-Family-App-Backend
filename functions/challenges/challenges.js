@@ -49,6 +49,7 @@ exports.createChallangeInstance = functions.https.onRequest(async (req, res) => 
         const challangeInstance = {
             challangerId: challangerId,
             invitationId: invitationId,
+            link: link,
             timeStamp: Date.now()
         };
 

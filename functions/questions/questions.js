@@ -168,7 +168,7 @@ exports.getScore = functions.https.onRequest(async (req, res, next) => {
 
         }
         var result = await scoresDb.push(newScore).getKey();
-        handleResponse(req, res, { "scoreId": result, "net score": score, "percentage": percentage, "shareCode": newScore.shareCode });
+        handleResponse(req, res, { "scoreId": result, "net score": score, "percentage": percentage, "shareCode": newScore.shareCode, link: [link] });
     } catch (err) {
         logger.log("Error with score")
         logger.log(err);
@@ -261,6 +261,7 @@ exports.getSingleScoreById = functions.https.onRequest(async (req, res) => {
         const { scoreId } = mustValidate(validateSchema(), req.body);
 
         const scoresDb = config.getScoresDb();
+        const challengeInstanceDb = config.getChallengeInstancesDb()
 
         var scoreExists = await (await scoresDb.child(scoreId).get()).val();
         if (scoreExists === null) {
@@ -269,11 +270,35 @@ exports.getSingleScoreById = functions.https.onRequest(async (req, res) => {
         }
         //only for pretty json
         var score = scoreExists;
-        handleResponse(req, res,  score );
+        if (!score.challangeId) {
+            var newScore = {
+                challangeId: score.challangeId,
+                respondentId: score.respondentId,
+                netScore: score.netScore,
+                percentage: score.percentage,
+                timeStamp: score.timeStamp,
+                shareCode: score.shareCode,
+                videos: [score.link]
+
+            }
+        } else {
+            var link1=(await challengeInstanceDb.child(score.challangeId).get()).val().link
+            var newScore = {
+                challangeId: score.challangeId,
+                respondentId: score.respondentId,
+                netScore: score.netScore,
+                percentage: score.percentage,
+                timeStamp: score.timeStamp,
+                shareCode: score.shareCode,
+                videos: [score.link, link1]
+
+            }
+        }
+        handleResponse(req, res, newScore);
 
     } catch (err) {
         logger.log(err);
-        handleResponse(req, res, { status: "error", "msg": err.msg ? { detail: err.message } : err },500)
+        handleResponse(req, res, { status: "error", "msg": err.msg ? { detail: err.message } : err }, 500)
 
     }
 })
@@ -310,7 +335,7 @@ exports.addScoreForPlayTogether = functions.https.onRequest(async (req, res) => 
         if (link === false) {
             throw new ErrorWithDetail("Something went wrong uploading file", "upload")
         }
-        
+
         var respondantExists = await (await usersDb.child(respondentId).get()).val();
 
         if (respondantExists === null) {
@@ -329,7 +354,7 @@ exports.addScoreForPlayTogether = functions.https.onRequest(async (req, res) => 
         }
         var result = await scoresDb.push(newScore).getKey();
 
-        handleResponse(req, res, { "scoreId": result, "net score": netScore, "percentage": percentage, "shareCode": newScore.shareCode });
+        handleResponse(req, res, { "scoreId": result, "net score": netScore, "percentage": percentage, "shareCode": newScore.shareCode, "videos": [link] });
     } catch (err) {
         logger.log(err);
         handleResponse(req, res, { status: "error", "msg": err.msg ? { detail: err.message } : err }, 500)
