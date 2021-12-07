@@ -128,8 +128,9 @@ exports.adminLinkList = functions.https.onRequest(async (req, res) => {
         links = Object.entries(links)
         var startAt = page * itemsPerPage
         var endAt = startAt + itemsPerPage
+        total_links = links.length
         links = links.slice(startAt, endAt)
-        handleResponse(req, res, links)
+        handleResponse(req, res, { links: links, total_links: total_links })
     } catch (err) {
         logger.log(err);
         handleResponse(req, res, { status: "error", "msg": err.msg ? { detail: err.message } : err }, 500);

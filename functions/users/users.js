@@ -189,8 +189,9 @@ exports.getUsersList = functions.https.onRequest(async (req, res) => {
         users = Object.entries(users)
         var startAt = page * itemsPerPage
         var endAt = startAt + itemsPerPage
+        const total_users= users.length
         users = users.slice(startAt, endAt)
-        handleResponse(req, res, users)
+        handleResponse(req, res, { users: users, total_users: total_users })
     } catch (err) {
         logger.log(err);
 

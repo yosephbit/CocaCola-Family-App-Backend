@@ -15,6 +15,7 @@ const handleResponse = require("../utils/handleResponse");
 const ErrorWithDetail = require("../utils/ErrorWithDetail");
 const config = require("../utils/config");
 const checkSessions = require("../utils/checkSessions");
+const { ConversationPage } = require("twilio/lib/rest/conversations/v1/conversation");
 
 exports.addAnswers = functions.https.onRequest(async (req, res) => {
     try {
@@ -208,7 +209,6 @@ exports.getQuiz = functions.https.onRequest(async (req, res) => {
         for (const question of randmizedQuestions) {
             var choice1 = await getQuestionsChoiceById(question[1].answersId.choiceID1);
             var choice2 = await getQuestionsChoiceById(question[1].answersId.choiceID2);
-            console.log(question)
             var questionFull = {
                 "relation": question[1].relation,
                 "question": {
@@ -410,10 +410,11 @@ exports.editQuestion = functions.https.onRequest(async (req, res) => {
             joi.object({
                 questionId: joi.string().required(),
                 questionText: joi.string().required(),
+                challengeText: joi.string().required(),
                 uid: joi.string().required(),
                 token: joi.string().required()
             }).required();
-        const { questionId, questionText, uid, token } = mustValidate(validateSchema(), req.body);
+        const { questionId, questionText,challengeText, uid, token } = mustValidate(validateSchema(), req.body);
         const session = await checkSessions(token, uid);
         if (!session) {
             handleResponse(req, res, { status: "error", "msg": "Session Expired" }, 401)
@@ -428,6 +429,7 @@ exports.editQuestion = functions.https.onRequest(async (req, res) => {
         }
         var question = {
             questionText: questionText,
+            challengeText: challengeText,
             answerId: questionExists.answersId
         };
 
@@ -498,7 +500,6 @@ exports.addMultipleQuestions = functions.https.onRequest(async (req, res) => {
                 answersText: question.answers.choice2.choiceText
             }
             var choiceID2 = choiceDb.push(answer).getKey();
-            console.log(question.question.challengeText)
             var availableAnswers = {
                 questionText: question.question.questionText,
                 challengeText: question.question.challengeText,
@@ -634,10 +635,11 @@ exports.getScoresList = functions.https.onRequest(async (req, res) => {
         const getScoresDb = config.getScoresDb()
         var scores = await (await getScoresDb.orderByKey().get()).val();
         scores = Object.entries(scores)
+        total_scores = scores.length
         var startAt = page * itemsPerPage
         var endAt = startAt + itemsPerPage
         scores = scores.slice(startAt, endAt)
-        handleResponse(req, res, scores)
+        handleResponse(req, res, { scores: scores, total_scores: total_scores })
     } catch (err) {
         logger.log(err);
         handleResponse(req, res, { status: "error", "msg": err.msg ? { detail: err.message } : err }, 500);
@@ -656,17 +658,43 @@ exports.getQuestionsList = functions.https.onRequest(async (req, res) => {
         const { page, itemsPerPage, uid, token } = mustValidate(validateSchema(), req.body)
         const session = await checkSessions(token, uid);
         if (!session) {
-            handleResponse(req, res, { status: "error", "msg": "Sessions Expired" }, 401)
-            return
+         //   handleResponse(req, res, { status: "error", "msg": "Sessions Expired" }, 401)
+           // return
         }
-
         const getQuestionsDb = config.getQuestionsDb()
         var questions = await (await getQuestionsDb.orderByKey().get()).val();
-        questions = Object.entries(questions)
+        
         var startAt = page * itemsPerPage
         var endAt = startAt + itemsPerPage
+        questions = Object.entries(questions)
+        total_questions = questions.length
         questions = questions.slice(startAt, endAt)
-        handleResponse(req, res, questions)
+
+        const questionArray = [];
+        for (const question of questions) {
+            var choice1 = await getQuestionsChoiceById(question[1].answersId.choiceID1);
+            var choice2 = await getQuestionsChoiceById(question[1].answersId.choiceID2);
+            var questionFull = {
+                "relation": question[1].relation,
+                "question": {
+                    "questionId": question[0],
+                    "questionText": question[1].questionText,
+                    "challengeText": question[1].challengeText
+                },
+                "answers": {
+                    "choice1": {
+                        "choiceId": question[1].answersId.choiceID1,
+                        "choiceText": choice1.answersText
+                    },
+                    "choice2": {
+                        "choiceId": question[1].answersId.choiceID2,
+                        "choiceText": choice2.answersText
+                    },
+                }
+            }
+            questionArray.push(questionFull);
+        }
+        handleResponse(req, res, {questions: questionArray, total_questions: total_questions});
     } catch (err) {
         logger.log(err);
         handleResponse(req, res, { status: "error", "msg": err.msg ? { detail: err.message } : err }, 500);
