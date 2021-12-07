@@ -45,7 +45,9 @@ async function initializeQuestions() {
             var choiceID2 = choiceDb.push(answer).getKey();
 
             var availableAnswers = {
+                relation: question.relation,
                 questionText: question.question.questionText,
+                challengeText: question.question.challengeText,
                 answersId: {
                     choiceID1: choiceID1,
                     choiceID2: choiceID2

@@ -1,52 +1,186 @@
 {
     "questions": [
         {
+            "relation" : "grandpa",
             "question": {
                 "questionId": "-MpNZy9kaT6hlVBaaCyY",
-                "questionText": "Your loved one Likes?"
+                "questionText": "Best CNY gift for me is:",
+                "challengeText" : "Best CNY gift for Grandpa is:"
             },
             "answers": {
                 "choice1": {
                     "choiceId": "-MpN_LlE5igfauaHWvPa",
-                    "choiceText": "More Ang Bao"
+                    "choiceText": "Eating with family"
                 },
                 "choice2": {
                     "choiceId": "-MpN_Qvpz-eoWy8PvYqY",
-                    "choiceText": "GrandChildren"
+                    "choiceText": "Great-Grandchildren"
+                }
+            }
+        },
+        
+        {
+            "relation" : "grandpa",
+            "question": {
+                "questionId": "-MpNZy9kaT6hlVBaaCyY",
+                "questionText": "I love CNY because I can:",
+                "challengeText" : "Grandpa loves CNY because he can:"
+            },
+            "answers": {
+                "choice1": {
+                    "choiceId": "-MpN_LlE5igfauaHWvPa",
+                    "choiceText": "Eat CNY goodies!"
+                },
+                "choice2": {
+                    "choiceId": "-MpN_Qvpz-eoWy8PvYqY",
+                    "choiceText": "See Grandkids"
                 }
             }
         },
         {
+            "relation" : "grandpa",
             "question": {
-                "questionId": "-MpNa0oTS90FXj9JvwkN",
-                "questionText": "What is more diffecult for you"
+                "questionId": "-MpNZy9kaT6hlVBaaCyY",
+                "questionText": "What do I love to do on CNY?",
+                "challengeText" : "What does Grandpa love to do on CNY?"
             },
             "answers": {
                 "choice1": {
-                    "choiceId": "-MpNa5mzqY2HK2AvQPib",
-                    "choiceText": "Spring CLeaning"
+                    "choiceId": "-MpN_LlE5igfauaHWvPa",
+                    "choiceText": "Watch Lion Dance"
                 },
                 "choice2": {
-                    "choiceId": "-MpNa9Yb4hP1pIwEIbho",
-                    "choiceText": "Not eating the CNy goods"
+                    "choiceId": "-MpN_Qvpz-eoWy8PvYqY",
+                    "choiceText": "Watch CNY Shows"
                 }
             }
         },
         {
+            "relation" : "grandpa",
             "question": {
-                "questionId": "-MpNaQTTpvCFilCK1GTn",
-                "questionText": "What is you want your son to do during this cny"
+                "questionId": "-MpNZy9kaT6hlVBaaCyY",
+                "questionText": "The best praise for me during CNY is:",
+                "challengeText" : "The best praise for your Grandpa during CNY is:"
             },
             "answers": {
                 "choice1": {
-                    "choiceId": "-MpNaVaBRi9eJH2y-aA0",
-                    "choiceText": "Help in spring cleaning"
+                    "choiceId": "-MpN_LlE5igfauaHWvPa",
+                    "choiceText": "Still so young!"
                 },
                 "choice2": {
-                    "choiceId": "-MpNaYisKo697z0Mop1G",
-                    "choiceText": "Help in cny decorations"
+                    "choiceId": "-MpN_Qvpz-eoWy8PvYqY",
+                    "choiceText": "Still so strong!"
+                }
+            }
+        },
+        {
+            "relation" : "grandpa",
+            "question": {
+                "questionId": "-MpNZy9kaT6hlVBaaCyY",
+                "questionText": "Which snack do I like more:",
+                "challengeText" : "Which snack does Grandpa like more:"
+            },
+            "answers": {
+                "choice1": {
+                    "choiceId": "-MpN_LlE5igfauaHWvPa",
+                    "choiceText": "Bak Kwa"
+                },
+                "choice2": {
+                    "choiceId": "-MpN_Qvpz-eoWy8PvYqY",
+                    "choiceText": "Pineapple Tart"
+                }
+            }
+        },
+        {
+            "relation" : "grandma",
+            "question": {
+                "questionId": "-MpNZy9kaT6hlVBaaCyY",
+                "questionText": "Best CNY gift for me is:",
+                "challengeText" : "Best CNY gift for grandma is:"
+            },
+            "answers": {
+                "choice1": {
+                    "choiceId": "-MpN_LlE5igfauaHWvPa",
+                    "choiceText": "Eating with family"
+                },
+                "choice2": {
+                    "choiceId": "-MpN_Qvpz-eoWy8PvYqY",
+                    "choiceText": "Great-Grandchildren"
+                }
+            }
+        },
+        {
+            "relation" : "grandma",
+            "question": {
+                "questionId": "-MpNZy9kaT6hlVBaaCyY",
+                "questionText": "I love CNY because I can:",
+                "challengeText" : "grandma loves CNY because she can:"
+            },
+            "answers": {
+                "choice1": {
+                    "choiceId": "-MpN_LlE5igfauaHWvPa",
+                    "choiceText": "Cook for whole family"
+                },
+                "choice2": {
+                    "choiceId": "-MpN_Qvpz-eoWy8PvYqY",
+                    "choiceText": "See Grandkids"
+                }
+            }
+        },
+        {
+            "relation" : "grandma",
+            "question": {
+                "questionId": "-MpNZy9kaT6hlVBaaCyY",
+                "questionText": "What do I love to do on CNY?",
+                "challengeText" : "What does grandma love to do on CNY?"
+            },
+            "answers": {
+                "choice1": {
+                    "choiceId": "-MpN_LlE5igfauaHWvPa",
+                    "choiceText": "Cook up a storm "
+                },
+                "choice2": {
+                    "choiceId": "-MpN_Qvpz-eoWy8PvYqY",
+                    "choiceText": "Chat with Grandkids"
+                }
+            }
+        },
+        {
+            "relation" : "grandma",
+            "question": {
+                "questionId": "-MpNZy9kaT6hlVBaaCyY",
+                "questionText": "Tshebest praise for me during CNY is:",
+                "challengeText" : "The best praise for your grandma during CNY is:"
+            },
+            "answers": {
+                "choice1": {
+                    "choiceId": "-MpN_LlE5igfauaHWvPa",
+                    "choiceText": "Excellent Cooking!"
+                },
+                "choice2": {
+                    "choiceId": "-MpN_Qvpz-eoWy8PvYqY",
+                    "choiceText": "Nice CNY Decorations!"
+                }
+            }
+        },
+        {
+            "relation" : "grandma",
+            "question": {
+                "questionId": "-MpNZy9kaT6hlVBaaCyY",
+                "questionText": "For me, Reunion Dinner is best when it's:",
+                "challengeText" : "For Grandma, Reunion Dinner is best when it's:"
+            },
+            "answers": {
+                "choice1": {
+                    "choiceId": "-MpN_LlE5igfauaHWvPa",
+                    "choiceText": "Home-cooked"
+                },
+                "choice2": {
+                    "choiceId": "-MpN_Qvpz-eoWy8PvYqY",
+                    "choiceText": "Pot-luck"
                 }
             }
         }
+
     ]
 }
