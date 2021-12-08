@@ -10,10 +10,10 @@ async function uploadFile(files) {
     }
     var filePath = file.path;
     var bucket = admin.storage().bucket();
-    var dest = "profile/" + nanoid() + ".webm"
+    var dest = "profile/" + nanoid() + ".mp4"
     const options = {
         destination: dest,
-        contentType: "video/webm", //file.path
+        contentType: "video/mp4", //file.path
     };
     const result = await bucket.upload(filePath, options);
 

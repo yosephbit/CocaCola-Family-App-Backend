@@ -401,8 +401,8 @@
             "relation" : "son",
             "question": {
                 "questionId": "-MpNZy9kaT6hlVBaaCyY",
-                "questionText": "Which is more fun for your Son on CNY?: ",
-                "challengeText" : "Which is more fun for you on CNY?"
+                "questionText": "Which is more fun for you on CNY?",
+                "challengeText" : "Which is more fun for your Son on CNY? "
             },
             "answers": {
                 "choice1": {

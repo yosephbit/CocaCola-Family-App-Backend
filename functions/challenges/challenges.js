@@ -127,7 +127,7 @@ exports.getChallenge = functions.https.onRequest(async (req, res) => {
         var challengeQuestions =
             await challengerDb.orderByChild("challangeInstanceId").equalTo(challengeInstanceId).once("value", snapshot => {
                 if (snapshot.exists()) {
-                    questions = snapshot.val();
+                    challengeQuestions = snapshot.val();
                 } else {
 
                     handleResponse(req, res, { status: "error", "msg": "Challenger Id not found" }, 404)

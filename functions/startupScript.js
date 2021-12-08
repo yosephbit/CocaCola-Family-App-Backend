@@ -26,7 +26,6 @@ async function initializeQuestions() {
         const db = config.getQuestionsDb();
         const choiceDb = config.getQuestionChoicesDb()
         for (const question of questions.questions) {
-            logger.log(question.question.questionText)
             var getSingleQuestion = {
                 questionText: question.question.questionText,
                 availableAnswers: {
