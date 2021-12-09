@@ -216,7 +216,7 @@ exports.onChallengeCreated = functions.https.onRequest(async (req, res) => {
 })
 
 async function createSmsBodyHelper(challangeInstanceId, challangerName) {
-    var body = "your "+ challangerName + " has prepared your trivial quiz. Go to "
+    var body = "Your "+ challangerName + " has prepared your trivial quiz. Go to "
     var link = FORNT_END_URL + "?challenge=" + challangeInstanceId
 
     link = await TinyURL.shorten(link)
