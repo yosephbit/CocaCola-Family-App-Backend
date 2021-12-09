@@ -93,7 +93,7 @@ exports.verifyToken = functions.https.onRequest(async (req, res) => {
 
         if (phone_inuse) {
             config.getUsersDb().child(result).set(user)
-            handleResponse(req, res, { uid: user })
+            handleResponse(req, res, { uid: result })
             return;
         }
         var result = await usersDb.push(user).getKey();

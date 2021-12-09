@@ -16,6 +16,7 @@ const sendSms = require("../utils/SendSms");
 const config = require("../utils/config");
 const TinyURL = require('tinyurl');
 
+FORNT_END_URL="https://coke-cny.netlify.app"
 
 exports.createChallangeInstance = functions.https.onRequest(async (req, res) => {
     try {
@@ -142,25 +143,24 @@ exports.getChallenge = functions.https.onRequest(async (req, res) => {
             questionDetails = await (await questionsDb.child(question[1]?.questionId).get()).val();
             var choice1 = await getQuestionsChoiceById(questionDetails?.answersId?.choiceID1);
             var choice2 = await getQuestionsChoiceById(questionDetails?.answersId?.choiceID2);
-
             var questionFull = {
-                "relation": question[1].relation,
                 "question": {
-                    "questionId": question[0],
-                    "questionText": question[1].questionText,
-                    "challengeText": question[1].challengeText
+                    "questionId": question[1]?.questionId,
+                    "questionText": questionDetails?.questionText,
+                    "challengeText": questionDetails?.challengeText
                 },
                 "answers": {
                     "choice1": {
-                        "choiceId": question[1].answersId.choiceID1,
-                        "choiceText": choice1.answersText
+                        "choiceId": questionDetails?.answersId?.choiceID1,
+                        "choiceText": choice1?.answersText
                     },
                     "choice2": {
-                        "choiceId": question[1].answersId.choiceID2,
-                        "choiceText": choice2.answersText
+                        "choiceId": questionDetails?.answersId?.choiceID2,
+                        "choiceText": choice2?.answersText
                     },
                 }
             }
+            
             quizeArray.push(questionFull);
 
         }
@@ -204,7 +204,7 @@ exports.onChallengeCreated = functions.https.onRequest(async (req, res) => {
         var smsTo = user.phone_number
         var smsBody = await createSmsBodyHelper(challengeInstanceId, relation.relation)
         await sendSms(smsTo, smsBody);
-        var link = process.env.FORNT_END_URL + "?challenge=" + challengeInstanceId
+        var link = FORNT_END_URL + "?challenge=" + challengeInstanceId
 
         link = await TinyURL.shorten(link)
         logger.log(link)
@@ -217,7 +217,7 @@ exports.onChallengeCreated = functions.https.onRequest(async (req, res) => {
 
 async function createSmsBodyHelper(challangeInstanceId, challangerName) {
     var body = "your "+ challangerName + " has prepared your trivial quiz. Go to "
-    var link = process.env.FORNT_END_URL + "?challenge=" + challangeInstanceId
+    var link = FORNT_END_URL + "?challenge=" + challangeInstanceId
 
     link = await TinyURL.shorten(link)
     body = body + link + " to complete the challenge!";
