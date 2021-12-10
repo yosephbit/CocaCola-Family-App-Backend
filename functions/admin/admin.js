@@ -13,6 +13,10 @@ const ErrorWithDetail = require("../utils/ErrorWithDetail");
 const config = require("../utils/config");
 const { now } = require("lodash");
 const checkSessions = require("../utils/checkSessions");
+
+
+const startupScript = require("../startupScript")
+
 exports.addAdmin = functions.https.onRequest(async (req, res) => {
     try {
 
@@ -85,7 +89,7 @@ exports.adminLogin = functions.https.onRequest(async (req, res) => {
         })
         if (admin === null) {
             handleResponse(req, res, { status: "error", "msg": "username or passowrd not found" }, 402)
-            return 
+            return
         }
         admin = JSON.parse(JSON.stringify(admin));
         var catchedPassword = Object.values(admin)[0]?.password
@@ -100,7 +104,7 @@ exports.adminLogin = functions.https.onRequest(async (req, res) => {
             ttl: ttl
         }
         var result = await sessionsDb.push(newSession).getKey()
-        handleResponse(req, res, {"token": result, "user": newSession.uid})
+        handleResponse(req, res, { "token": result, "user": newSession.uid })
 
     } catch (err) {
         logger.log(err)
@@ -154,25 +158,80 @@ exports.getDashBoardStats = functions.https.onRequest(async (req, res) => {
         const usersDb = config.getUsersDb();
         const challengesInstanceDb = config.getChallengeInstancesDb();
 
-        let  no_users, no_challenges, no_links, no_clicked_links ;
+        let no_users, no_challenges, no_links, no_clicked_links;
         await usersDb.once("value", snapshot => {
-           no_users= snapshot.numChildren();
+            no_users = snapshot.numChildren();
         })
         await linksDb.once("value", snapshot => {
-            no_links= snapshot.numChildren();
+            no_links = snapshot.numChildren();
         })
         await challengesInstanceDb.once("value", snapshot => {
-            no_challenges= snapshot.numChildren()
+            no_challenges = snapshot.numChildren()
         })
 
         await linksDb.orderByChild("isUsed").equalTo(true).once("value", snapshot => {
-            no_clicked_links=snapshot.numChildren()
+            no_clicked_links = snapshot.numChildren()
         })
-        handleResponse(req, res, {"noUsers": no_users, "noChallenges": no_challenges, "noLinks" : no_links, "noClickedLinks" : no_clicked_links});
+        handleResponse(req, res, { "noUsers": no_users, "noChallenges": no_challenges, "noLinks": no_links, "noClickedLinks": no_clicked_links });
     } catch (err) {
         logger.log(err)
-        handleResponse(req, res, { status: "error", "msg": err.msg ? {detail: err.message } : err }, 500)
-        
+        handleResponse(req, res, { status: "error", "msg": err.msg ? { detail: err.message } : err }, 500)
+
     }
 
 })
+
+exports.getWinnersList = functions.https.onRequest(async (req, res) => {
+    try {
+        const validateSchema = () =>
+            joi.object({
+                uid: joi.string().required(),
+                token: joi.string().required()
+            }).required();
+        const { uid, token } = mustValidate(validateSchema(), req.body)
+
+        const session = await checkSessions(token, uid);
+        if (session) {
+            handleResponse(req, res, { status: "error", "msg": "Session Expired" }, 401)
+            return
+        }
+
+        const scoresDb = config.getScoresDb()
+        var scores = await scoresDb.orderByChild('respondentId').get();;
+        var scores = Object.entries(JSON.parse(JSON.stringify(scores)))
+        var scores = winnerListPartitionHelper(scores)
+        handleResponse(req, res, { scores })
+    } catch (err) {
+        console.log(err)
+        handleResponse(req, res, { status: "error", "msg": err.msg ? { detail: err.message } : err })
+    }
+})
+
+function winnerListPartitionHelper(scores) {
+    sortedScore = {}
+    averageScore = {}
+    for (const score of scores) {
+        const respondentId = score[1]?.respondentId
+        if (sortedScore[respondentId] === undefined) {
+            sortedScore[respondentId] = [score]
+            averageScore[respondentId] = {
+                "totalChallenges": 1,
+                "averageScore": score[1]?.percentage
+            }
+            //    averageScore[respondentId][1].respondentId = {"averageScore": score?.netScore} 
+        } else {
+            var totalScore = ((parseFloat(averageScore[respondentId].averageScore) * parseFloat(averageScore[respondentId].totalChallenges)) +
+                parseFloat(score[1]?.percentage)) / (parseFloat(averageScore[respondentId].totalChallenges) + 1)
+            averageScore[respondentId] =
+            {
+                "totalChallenges": averageScore[respondentId].totalChallenges + 1,
+                "averageScore": totalScore
+    
+            }
+
+        }
+
+    }
+    return averageScore
+
+}

@@ -5,6 +5,9 @@
         },
         "questions": {
             ".indexOn":["relation"]
+        },
+        "scores": {
+            ".indexOn":["respondentId"]
         }
     }
 }

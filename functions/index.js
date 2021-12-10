@@ -1,6 +1,5 @@
 const functions = require("firebase-functions");
 const admin = require('firebase-admin');
-const bodyParser = require("body-parser");
 
 let isUser = true;
 
@@ -95,3 +94,5 @@ exports.getScoresList = questions.getScoresList;
 exports.getQuestionsList = questions.getQuestionsList;
 
 exports.getDashBoardStats = adminUsers.getDashBoardStats;
+
+exports.getWinnersList = adminUsers.getWinnersList;
