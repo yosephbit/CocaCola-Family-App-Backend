@@ -473,6 +473,24 @@
             "relation" : "daughter",
             "question": {
                 "questionId": "-MpNZy9kaT6hlVBaaCyY",
+                "questionText": "The best praise for me during CNY is:",
+                "challengeText" : "The best praise for your daughter during CNY is:"
+            },
+            "answers": {
+                "choice1": {
+                    "choiceId": "-MpN_LlE5igfauaHWvPa",
+                    "choiceText": "You lost weight"
+                },
+                "choice2": {
+                    "choiceId": "-MpN_Qvpz-eoWy8PvYqY",
+                    "choiceText": "You got prettier!"
+                }
+            }
+        },
+        {
+            "relation" : "daughter",
+            "question": {
+                "questionId": "-MpNZy9kaT6hlVBaaCyY",
                 "questionText": "Which is more fun for you on CNY:",
                 "challengeText" : "Which is more fun for your Daughter on CNY:" 
             },
@@ -505,24 +523,7 @@
                 }
             }
         },
-        {
-            "relation" : "daughter",
-            "question": {
-                "questionId": "-MpNZy9kaT6hlVBaaCyY",
-                "questionText": "The best praise for me during CNY is:",
-                "challengeText" : "The best praise for your daughter during CNY is:"
-            },
-            "answers": {
-                "choice1": {
-                    "choiceId": "-MpN_LlE5igfauaHWvPa",
-                    "choiceText": "You lost weight"
-                },
-                "choice2": {
-                    "choiceId": "-MpN_Qvpz-eoWy8PvYqY",
-                    "choiceText": "You got prettier!"
-                }
-            }
-        },
+
         {
             "relation" : "daughter",
             "question": {
