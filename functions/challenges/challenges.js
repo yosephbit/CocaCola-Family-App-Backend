@@ -215,6 +215,34 @@ exports.onChallengeCreated = functions.https.onRequest(async (req, res) => {
     }
 })
 
+exports.upload = functions.https.onRequest(async (req, res) => {
+    try {
+
+        var form = new formidable.IncomingForm();
+        let link;
+        let bodyParams;
+        await new Promise((resolve, reject) => {
+            form.parse(req, async (err, fields, files) => {
+                try {
+                    bodyParams = fields;
+                    link = await uploadFile.uploadFile(files)
+                    resolve()
+                } catch (e) {
+                    console.log(e)
+                    link = false;
+                    reject()
+                }
+            });
+        })
+        if (link === false) {
+            throw new ErrorWithDetail("Something went wrong uploading file", "upload")
+        }
+        handleResponse(req, res, { link })
+    } catch (err) {
+        logger.log(err)
+        handleResponse(req, res, { status: "error", "msg": err.msg ? { detail: err.message } : err },500)
+    }
+})
 async function createSmsBodyHelper(challangeInstanceId, challangerName) {
     var body = "Your "+ challangerName + " has prepared your trivial quiz. Go to "
     var link = FORNT_END_URL + "?challenge=" + challangeInstanceId

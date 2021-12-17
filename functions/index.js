@@ -61,6 +61,7 @@ exports.addChallange = challenges.addChallange;
 exports.getChallenge = challenges.getChallenge;
 
 exports.createChallangeInstance = challenges.createChallangeInstance;
+exports.upload = challenges.upload;
 
 exports.onChallengeCreated = challenges.onChallengeCreated;
 
