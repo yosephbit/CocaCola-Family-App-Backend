@@ -111,6 +111,6 @@ function generateRandomNumber() {
     return random;
 }
 function createSmsBodyHelper(sms_token) {
-    var message = " Your Family Reunion verfication code is " + sms_token;
+    var message = " Your Coca-Cola Family Reunion Trivia Challenge verification code is " + sms_token;
     return message;
 }
