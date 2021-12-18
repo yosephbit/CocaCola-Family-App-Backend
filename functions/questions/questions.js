@@ -112,7 +112,9 @@ exports.getScore = functions.https.onRequest(async (req, res, next) => {
         const answersDb = config.getAnswersDb();
         const scoresDb = config.getScoresDb();
 
+
         var respondantExists = await (await usersDb.child(respondentId).get()).val();
+
 
         if (respondantExists === null) {
             handleResponse(req, res, { status: "error", "msg": "respondandt Id not found" }, 401)
@@ -190,7 +192,7 @@ exports.getQuiz = functions.https.onRequest(async (req, res) => {
         const linkInfoDb = config.getLinkInfoDb();
         var relation;
         if (invitationId.includes("TOGETHER")) {
-            relation=invitationId.split(':')[1].toLowerCase()
+            relation = invitationId.split(':')[1].toLowerCase()
         } else {
             relation = (await linkInfoDb.child(invitationId).get()).val().relation;
             if (!relation) {
@@ -202,7 +204,7 @@ exports.getQuiz = functions.https.onRequest(async (req, res) => {
         questions = Object.entries(questions)
 
         //questions=JSON.stringify(questions);
-        
+
         randmizedQuestions = questions;
         randmizedQuestions = randmizedQuestions.slice(0, numberOfQuestions)
         quizeArray = []
@@ -271,7 +273,9 @@ exports.getSingleScoreById = functions.https.onRequest(async (req, res) => {
         const { scoreId } = mustValidate(validateSchema(), req.body);
 
         const scoresDb = config.getScoresDb();
-        const challengeInstanceDb = config.getChallengeInstancesDb()
+        const linkInfoDB = config.getLinkInfoDb()
+        challenge = JSON.parse(JSON.stringify(challangeExists));
+
 
         var scoreExists = await (await scoresDb.child(scoreId).get()).val();
         if (scoreExists === null) {
@@ -281,6 +285,15 @@ exports.getSingleScoreById = functions.https.onRequest(async (req, res) => {
         //only for pretty json
         var score = scoreExists;
         if (!score.challangeId) {
+            const challengeInstanceDb = config.getChallengeInstancesDb()
+            var challangeExists = await (await challengeInstanceDb.child(score.challangeId).get()).val();
+            if (challangeExists === null) {
+                handleResponse(req, res, { status: "error", "msg": "Challenge Instance Id not found" }, 404)
+                return
+            }
+
+            var relation = await (await linkInfoDB.child(challenge.invitationId).get()).val();
+
             var newScore = {
                 challangeId: score.challangeId,
                 respondentId: score.respondentId,
@@ -288,11 +301,12 @@ exports.getSingleScoreById = functions.https.onRequest(async (req, res) => {
                 percentage: score.percentage,
                 timeStamp: score.timeStamp,
                 shareCode: score.shareCode,
+                relation: relation.relation,
                 videos: [score.link]
 
             }
         } else {
-            var link1=(await challengeInstanceDb.child(score.challangeId).get()).val().link
+            var link1 = (await challengeInstanceDb.child(score.challangeId).get()).val().link
             var newScore = {
                 challangeId: score.challangeId,
                 respondentId: score.respondentId,
@@ -439,7 +453,7 @@ exports.editQuestion = functions.https.onRequest(async (req, res) => {
                 uid: joi.string().required(),
                 token: joi.string().required()
             }).required();
-        const { questionId, questionText,challengeText, uid, token } = mustValidate(validateSchema(), req.body);
+        const { questionId, questionText, challengeText, uid, token } = mustValidate(validateSchema(), req.body);
         const session = await checkSessions(token, uid);
         if (!session) {
             handleResponse(req, res, { status: "error", "msg": "Session Expired" }, 401)
@@ -683,12 +697,12 @@ exports.getQuestionsList = functions.https.onRequest(async (req, res) => {
         const { page, itemsPerPage, uid, token } = mustValidate(validateSchema(), req.body)
         const session = await checkSessions(token, uid);
         if (!session) {
-         //   handleResponse(req, res, { status: "error", "msg": "Sessions Expired" }, 401)
-           // return
+            //   handleResponse(req, res, { status: "error", "msg": "Sessions Expired" }, 401)
+            // return
         }
         const getQuestionsDb = config.getQuestionsDb()
         var questions = await (await getQuestionsDb.orderByKey().get()).val();
-        
+
         var startAt = page * itemsPerPage
         var endAt = startAt + itemsPerPage
         questions = Object.entries(questions)
@@ -719,7 +733,7 @@ exports.getQuestionsList = functions.https.onRequest(async (req, res) => {
             }
             questionArray.push(questionFull);
         }
-        handleResponse(req, res, {questions: questionArray, total_questions: total_questions});
+        handleResponse(req, res, { questions: questionArray, total_questions: total_questions });
     } catch (err) {
         logger.log(err);
         handleResponse(req, res, { status: "error", "msg": err.msg ? { detail: err.message } : err }, 500);
