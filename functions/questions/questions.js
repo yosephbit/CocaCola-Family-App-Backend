@@ -652,7 +652,7 @@ exports.editQuestionChoice = functions.https.onRequest(async (req, res) => {
     try {
         const validateSchema = () =>
             joi.object({
-                choiceId: joi.string().required(),
+                choiceID: joi.string().required(),
                 answersText: joi.string().required(),
                 uid: joi.string().required(),
                 token: joi.string().required()
