@@ -286,13 +286,33 @@ exports.getSingleScoreById = functions.https.onRequest(async (req, res) => {
         
         const challengeInstanceDb = config.getChallengeInstancesDb()
         if (!score.challangeId) {
+            // var challangeExists = await (await challengeInstanceDb.child(score.challangeId).get()).val();
+            // if (challangeExists === null) {
+            //     handleResponse(req, res, { status: "error", "msg": "Challenge Instance Id not found" }, 404)
+            //     return
+            // }
+            // challenge = JSON.parse(JSON.stringify(challangeExists));
+
+
+            var newScore = {
+                // challangeId: score.challangeId,
+                respondentId: score.respondentId,
+                netScore: score.netScore,
+                percentage: score.percentage,
+                timeStamp: score.timeStamp,
+                shareCode: score.shareCode,
+                // relation: relation.relation,
+                videos: [score.link]
+
+            }
+        } else {
+            var link1 = (await challengeInstanceDb.child(score.challangeId).get()).val().link
             var challangeExists = await (await challengeInstanceDb.child(score.challangeId).get()).val();
             if (challangeExists === null) {
                 handleResponse(req, res, { status: "error", "msg": "Challenge Instance Id not found" }, 404)
                 return
             }
             challenge = JSON.parse(JSON.stringify(challangeExists));
-
             var relation = await (await linkInfoDB.child(challenge.invitationId).get()).val();
 
             var newScore = {
@@ -303,18 +323,6 @@ exports.getSingleScoreById = functions.https.onRequest(async (req, res) => {
                 timeStamp: score.timeStamp,
                 shareCode: score.shareCode,
                 relation: relation.relation,
-                videos: [score.link]
-
-            }
-        } else {
-            var link1 = (await challengeInstanceDb.child(score.challangeId).get()).val().link
-            var newScore = {
-                challangeId: score.challangeId,
-                respondentId: score.respondentId,
-                netScore: score.netScore,
-                percentage: score.percentage,
-                timeStamp: score.timeStamp,
-                shareCode: score.shareCode,
                 videos: [score.link, link1]
 
             }
