@@ -200,13 +200,13 @@ exports.getQuiz = functions.https.onRequest(async (req, res) => {
             }
         }
         const numberOfQuestions = 5;
+        
         var questions = await (await questionsDb.orderByChild("relation").equalTo(relation).get()).val();
         questions = Object.entries(questions)
 
         //questions=JSON.stringify(questions);
 
         randmizedQuestions = questions;
-        randmizedQuestions = randmizedQuestions.slice(0, numberOfQuestions)
         quizeArray = []
         for (const question of randmizedQuestions) {
             var choice1 = await getQuestionsChoiceById(question[1].answersId.choiceID1);
@@ -549,7 +549,7 @@ exports.addMultipleQuestions = functions.https.onRequest(async (req, res) => {
         var questions = JSON.parse(JSON.stringify(req.body));
         for (const question of questions.questions) {
             const results = mustValidate(validateSchema(), question)
-            
+
         
             const db = config.getQuestionsDb();
             const choiceDb = config.getQuestionChoicesDb()

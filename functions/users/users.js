@@ -35,7 +35,8 @@ exports.generateInviteLink = functions.https.onRequest(async (req, res) => {
             inviterId: uid,
             relation: relation.toLowerCase(),
             isUsed: false,
-            invitedId: ''
+            invitedId: '',
+            timeStamp: Date.now()
         };
         const linkId = nanoid(8);
         logger.log(linkId);
@@ -180,17 +181,53 @@ exports.getUsersList = functions.https.onRequest(async (req, res) => {
         const { page, itemsPerPage, uid, token } = mustValidate(validateSchema(), req.body)
         const session = await checkSessions(token, uid);
         if (!session) {
-            handleResponse(req, res, { status: "error", "msg": "Session Expired" }, 401)
-            return 
+           // handleResponse(req, res, { status: "error", "msg": "Session Expired" }, 401)
+           // return 
         }
 
         const usersDb = config.getUsersDb()
+        const linkInfoDB = config.getLinkInfoDb()
+        const challengeInstanceDb = config.getChallengeInstancesDb();
+        const scoresDb = config.getScoresDb()
+
+        //getting users
         var users = await (await usersDb.orderByKey().get()).val();
         users = Object.entries(users)
         var startAt = page * itemsPerPage
         var endAt = startAt + itemsPerPage
         const total_users= users.length
         users = users.slice(startAt, endAt)
+
+        
+        for (const user of users) {
+
+            //getting links
+            var links=[]
+            var generatedLinks = await (await linkInfoDB.orderByChild("inviterId").equalTo(user[0]).get()).val()
+            if (generatedLinks) {
+                links = Object.entries(generatedLinks)     
+            }
+            user[1].links = links
+            
+            //getting challengesCreated 
+
+            var challengesCreated = []
+            var challengesinstance = (await ( await challengeInstanceDb.orderByChild("challangerId").equalTo(user[0]).get()).val())
+            if (challengesinstance) {
+                challengesCreated = Object.entries(challengesinstance)
+            }
+            user[1].challengesCreated = challengesCreated
+
+            //getting scores 
+
+            var scores = []
+
+            var scoresInstances = await (await scoresDb.orderByChild("respondentId").equalTo(user[0]).get()).val()
+            if (scoresInstances) {
+                scores = Object.entries(scoresInstances)
+            }
+            user[1].scores = scores;
+        }
         handleResponse(req, res, { users: users, total_users: total_users })
     } catch (err) {
         logger.log(err);

@@ -8,6 +8,12 @@
         },
         "scores": {
             ".indexOn":["respondentId"]
+        },
+        "linkInfo": {
+            ".indexOn": ["inviterId"]
+        },
+        "challengeInstanceDb": {
+            ".indexOn":["challangerId"]
         }
     }
 }
