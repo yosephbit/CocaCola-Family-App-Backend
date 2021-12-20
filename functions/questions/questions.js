@@ -515,12 +515,34 @@ exports.deleteQuestion = functions.https.onRequest(async (req, res) => {
 
 exports.addMultipleQuestions = functions.https.onRequest(async (req, res) => {
     try {
-
+        const validateSchema = () =>
+            
+            joi.object().keys({
+                relation: joi.string().required(),
+                question : joi.object({
+                    questionText: joi.string().required(),
+                    challengeText: joi.string().required(),
+                    
+                }).unknown(true),
+                answers: joi.object().keys({
+                    choice1: joi.object({
+                        choiceText: joi.string().required(),
+                    }).unknown(true),
+                    choice2: joi.object({
+                        choiceText: joi.string().required(),
+                    }).unknown(true)
+                })
+            
+            }).unknown(true).required()
+        
         const db = config.getQuestionsDb();
         const choiceDb = config.getQuestionChoicesDb()
 
         var questions = JSON.parse(JSON.stringify(req.body));
         for (const question of questions.questions) {
+            const results = mustValidate(validateSchema(), question)
+            
+        
             const db = config.getQuestionsDb();
             const choiceDb = config.getQuestionChoicesDb()
             logger.log(question.question.questionText)
@@ -698,7 +720,7 @@ exports.getQuestionsList = functions.https.onRequest(async (req, res) => {
         const { page, itemsPerPage, uid, token } = mustValidate(validateSchema(), req.body)
         const session = await checkSessions(token, uid);
         if (!session) {
-            //   handleResponse(req, res, { status: "error", "msg": "Sessions Expired" }, 401)
+            //  handleResponse(req, res, { status: "error", "msg": "Sessions Expired" }, 401)
             // return
         }
         const getQuestionsDb = config.getQuestionsDb()
@@ -712,23 +734,23 @@ exports.getQuestionsList = functions.https.onRequest(async (req, res) => {
 
         const questionArray = [];
         for (const question of questions) {
-            var choice1 = await getQuestionsChoiceById(question[1].answersId.choiceID1);
-            var choice2 = await getQuestionsChoiceById(question[1].answersId.choiceID2);
+            var choice1 = await getQuestionsChoiceById(question[1]?.answersId?.choiceID1);
+            var choice2 = await getQuestionsChoiceById(question[1]?.answersId?.choiceID2);
             var questionFull = {
                 "relation": question[1].relation,
                 "question": {
                     "questionId": question[0],
-                    "questionText": question[1].questionText,
-                    "challengeText": question[1].challengeText
+                    "questionText": question[1]?.questionText,
+                    "challengeText": question[1]?.challengeText
                 },
                 "answers": {
                     "choice1": {
-                        "choiceId": question[1].answersId.choiceID1,
-                        "choiceText": choice1.answersText
+                        "choiceId": question[1]?.answersId?.choiceID1,
+                        "choiceText": choice1?.answersText
                     },
                     "choice2": {
-                        "choiceId": question[1].answersId.choiceID2,
-                        "choiceText": choice2.answersText
+                        "choiceId": question[1]?.answersId?.choiceID2,
+                        "choiceText": choice2?.answersText
                     },
                 }
             }
