@@ -459,10 +459,11 @@ exports.editQuestion = functions.https.onRequest(async (req, res) => {
                 questionId: joi.string().required(),
                 questionText: joi.string().required(),
                 challengeText: joi.string().required(),
+                relation: joi.string().required(),
                 uid: joi.string().required(),
                 token: joi.string().required()
             }).required();
-        const { questionId, questionText, challengeText, uid, token } = mustValidate(validateSchema(), req.body);
+        const { questionId, questionText, challengeText, relation, uid, token } = mustValidate(validateSchema(), req.body);
         const session = await checkSessions(token, uid);
         if (!session) {
             handleResponse(req, res, { status: "error", "msg": "Session Expired" }, 401)
@@ -478,6 +479,7 @@ exports.editQuestion = functions.https.onRequest(async (req, res) => {
         var question = {
             questionText: questionText,
             challengeText: challengeText,
+            relation: relation,
             answerId: questionExists.answersId
         };
 
