@@ -283,8 +283,9 @@ exports.getSingleScoreById = functions.https.onRequest(async (req, res) => {
         }
         //only for pretty json
         var score = scoreExists;
+        
+        const challengeInstanceDb = config.getChallengeInstancesDb()
         if (!score.challangeId) {
-            const challengeInstanceDb = config.getChallengeInstancesDb()
             var challangeExists = await (await challengeInstanceDb.child(score.challangeId).get()).val();
             if (challangeExists === null) {
                 handleResponse(req, res, { status: "error", "msg": "Challenge Instance Id not found" }, 404)
