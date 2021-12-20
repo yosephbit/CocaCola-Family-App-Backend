@@ -153,7 +153,7 @@ exports.getScore = functions.https.onRequest(async (req, res, next) => {
             var result = subjectsAnswers.find(findAnswersByQuestionId.bind(this, singleResponse));
             if (result != undefined) {
 
-                if (result[1].answerId === singleResponse[1].questionChoiceId) {
+                if (result[1].answerIds === singleResponse[1].questionChoiceId) {
                     score++;
                 }
             }
@@ -480,7 +480,7 @@ exports.editQuestion = functions.https.onRequest(async (req, res) => {
             questionText: questionText,
             challengeText: challengeText,
             relation: relation,
-            answerId: questionExists.answersId
+            answersId: questionExists.answersId
         };
 
         var result = await questionsDb.child(questionId).set(question)
