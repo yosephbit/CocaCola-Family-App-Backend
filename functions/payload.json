@@ -362,11 +362,11 @@
             }
         },
         {
-            "relation" : "son",
+            "relation" : "Brother",
             "question": {
                 "questionId": "-MpNZy9kaT6hlVBaaCyY",
                 "questionText": "What do you like about CNY:",
-                "challengeText" : "What does your Son like about CNY:"
+                "challengeText" : "What does your Brother like about CNY:"
             },
             "answers": {
                 "choice1": {
@@ -380,11 +380,11 @@
             }
         },
         {
-            "relation" : "son",
+            "relation" : "Brother",
             "question": {
                 "questionId": "-MpNZy9kaT6hlVBaaCyY",
                 "questionText": "What's the best CNY gift for you?",
-                "challengeText" : "What's the best CNY gift for your Son?" 
+                "challengeText" : "What's the best CNY gift for your Brother?" 
             },
             "answers": {
                 "choice1": {
@@ -398,11 +398,11 @@
             }
         },
         {
-            "relation" : "son",
+            "relation" : "Brother",
             "question": {
                 "questionId": "-MpNZy9kaT6hlVBaaCyY",
                 "questionText": "Which is more fun for you on CNY?",
-                "challengeText" : "Which is more fun for your Son on CNY? "
+                "challengeText" : "Which is more fun for your Brother on CNY? "
             },
             "answers": {
                 "choice1": {
@@ -416,11 +416,11 @@
             }
         },
         {
-            "relation" : "son",
+            "relation" : "Brother",
             "question": {
                 "questionId": "-MpNZy9kaT6hlVBaaCyY",
                 "questionText": "What excites you the most during CNY?",
-                "challengeText" : "What excites your Son the most during CNY?"
+                "challengeText" : "What excites your Brother the most during CNY?"
             },
             "answers": {
                 "choice1": {
@@ -434,11 +434,11 @@
             }
         },
         {
-            "relation" : "son",
+            "relation" : "Brother",
             "question": {
                 "questionId": "-MpNZy9kaT6hlVBaaCyY",
                 "questionText": "What is more difficult for you during CNY:",
-                "challengeText" : "What is more difficult for your Son during CNY:"
+                "challengeText" : "What is more difficult for your Brother during CNY:"
             },
             "answers": {
                 "choice1": {
@@ -452,11 +452,11 @@
             }
         },
         {
-            "relation" : "daughter",
+            "relation" : "Sister",
             "question": {
                 "questionId": "-MpNZy9kaT6hlVBaaCyY",
                 "questionText": "What do you like about CNY:",
-                "challengeText" : "What does your Daughter like about CNY:"
+                "challengeText" : "What does your Sister like about CNY:"
             },
             "answers": {
                 "choice1": {
@@ -470,11 +470,11 @@
             }
         },
         {
-            "relation" : "daughter",
+            "relation" : "Sister",
             "question": {
                 "questionId": "-MpNZy9kaT6hlVBaaCyY",
                 "questionText": "The best praise for me during CNY is:",
-                "challengeText" : "The best praise for your daughter during CNY is:"
+                "challengeText" : "The best praise for your Sister during CNY is:"
             },
             "answers": {
                 "choice1": {
@@ -488,11 +488,11 @@
             }
         },
         {
-            "relation" : "daughter",
+            "relation" : "Sister",
             "question": {
                 "questionId": "-MpNZy9kaT6hlVBaaCyY",
                 "questionText": "Which is more fun for you on CNY:",
-                "challengeText" : "Which is more fun for your Daughter on CNY:" 
+                "challengeText" : "Which is more fun for your Sister on CNY:" 
             },
             "answers": {
                 "choice1": {
@@ -506,11 +506,11 @@
             }
         },
         {
-            "relation" : "daughter",
+            "relation" : "Sister",
             "question": {
                 "questionId": "-MpNZy9kaT6hlVBaaCyY",
                 "questionText": "What excites you the most during CNY?",
-                "challengeText" : "What excites your Daughter the most during CNY?"
+                "challengeText" : "What excites your Sister the most during CNY?"
             },
             "answers": {
                 "choice1": {
@@ -525,11 +525,11 @@
         },
 
         {
-            "relation" : "daughter",
+            "relation" : "Sister",
             "question": {
                 "questionId": "-MpNZy9kaT6hlVBaaCyY",
                 "questionText": "Which CNY snack do you like more?",
-                "challengeText" : "Which CNY snack does your daughter like more:"
+                "challengeText" : "Which CNY snack does your Sister like more:"
             },
             "answers": {
                 "choice1": {

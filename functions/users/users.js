@@ -136,7 +136,7 @@ exports.addFamily = functions.https.onRequest(async (req, res) => {
             joi.object({
                 userId: joi.string().required(),
                 familyMemberId: joi.string().required(),
-                relation: joi.string().valid('GrandFather', 'GrandMother', 'Mother', 'Father', 'Son', 'Daughter').required()
+                relation: joi.string().valid('GrandFather', 'GrandMother', 'Mother', 'Father', 'Brother', 'Sister').required()
             }).required();
 
         const { userId, familyMemberId, relation } = mustValidate(validateSchema(), req.body);
