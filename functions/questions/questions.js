@@ -274,7 +274,6 @@ exports.getSingleScoreById = functions.https.onRequest(async (req, res) => {
 
         const scoresDb = config.getScoresDb();
         const linkInfoDB = config.getLinkInfoDb()
-        challenge = JSON.parse(JSON.stringify(challangeExists));
 
 
         var scoreExists = await (await scoresDb.child(scoreId).get()).val();
@@ -291,6 +290,7 @@ exports.getSingleScoreById = functions.https.onRequest(async (req, res) => {
                 handleResponse(req, res, { status: "error", "msg": "Challenge Instance Id not found" }, 404)
                 return
             }
+            challenge = JSON.parse(JSON.stringify(challangeExists));
 
             var relation = await (await linkInfoDB.child(challenge.invitationId).get()).val();
 
