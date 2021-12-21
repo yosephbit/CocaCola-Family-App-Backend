@@ -39,16 +39,16 @@ exports.createChallangeInstance = functions.https.onRequest(async (req, res) => 
         })
         const validateSchema = () =>
             joi.object({
-                challangerId: joi.string().required(),
+                // challangerId: joi.string().required(),
                 invitationId: joi.string().required()
             }).required();
-        const { invitationId,challangerId } = mustValidate(validateSchema(), bodyParams);
+        const { invitationId } = mustValidate(validateSchema(), bodyParams);
         
         if (link === false) {
             throw new ErrorWithDetail("Something went wrong uploading file", "upload")
         }
         const challangeInstance = {
-            challangerId: challangerId,
+            // challangerId: challangerId,
             invitationId: invitationId,
             link: link,
             timeStamp: Date.now()

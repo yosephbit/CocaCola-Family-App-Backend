@@ -11,9 +11,6 @@
         },
         "linkInfo": {
             ".indexOn": ["inviterId"]
-        },
-        "challengeInstanceDb": {
-            ".indexOn":["challangerId"]
         }
     }
 }

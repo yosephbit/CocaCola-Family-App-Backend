@@ -208,15 +208,6 @@ exports.getUsersList = functions.https.onRequest(async (req, res) => {
                 links = Object.entries(generatedLinks)     
             }
             user[1].links = links
-            
-            //getting challengesCreated 
-
-            var challengesCreated = []
-            var challengesinstance = (await ( await challengeInstanceDb.orderByChild("challangerId").equalTo(user[0]).get()).val())
-            if (challengesinstance) {
-                challengesCreated = Object.entries(challengesinstance)
-            }
-            user[1].challengesCreated = challengesCreated
 
             //getting scores 
 
