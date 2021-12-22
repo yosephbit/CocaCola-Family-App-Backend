@@ -217,7 +217,19 @@ exports.getUsersList = functions.https.onRequest(async (req, res) => {
             if (scoresInstances) {
                 scores = Object.entries(scoresInstances)
             }
+            for (const score of scores) {
+                if (score[1]?.challangeId) {
+                    var challengeInstance = await (await challengeInstanceDb.child(score[1]?.challangeId).get()).val()
+                    if (challengeInstance) {
+                        score[1].invitationId = challengeInstance?.invitationId     
+                    }    
+                }
+                
+                
+            }
+            //
             user[1].scores = scores;
+        
         }
         handleResponse(req, res, { users: users, total_users: total_users })
     } catch (err) {
