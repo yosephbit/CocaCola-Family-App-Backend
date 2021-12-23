@@ -301,7 +301,7 @@ exports.getSingleScoreById = functions.https.onRequest(async (req, res) => {
                 percentage: score.percentage,
                 timeStamp: score.timeStamp,
                 shareCode: score.shareCode,
-                // relation: relation.relation,
+                relation: score.relation,
                 videos: [score.link]
 
             }
@@ -358,9 +358,10 @@ exports.addScoreForPlayTogether = functions.https.onRequest(async (req, res) => 
             joi.object({
                 respondentId: joi.string().required(),
                 netScore: joi.number().required(),
-                percentage: joi.number().required()
+                percentage: joi.number().required(),
+                relation: joi.string().required()
             }).required()
-        const { respondentId, netScore, percentage } = mustValidate(validateSchema(), bodyParams);
+        const { respondentId, netScore, percentage, relation } = mustValidate(validateSchema(), bodyParams);
 
         const usersDb = config.getUsersDb();
         const scoresDb = config.getScoresDb();
@@ -381,6 +382,7 @@ exports.addScoreForPlayTogether = functions.https.onRequest(async (req, res) => 
             respondentId: respondentId,
             netScore: netScore,
             percentage: percentage,
+            relation: relation.toLowerCase(),
             timeStamp: Date.now(),
             shareCode: generateRandomNumber(),
             link: link

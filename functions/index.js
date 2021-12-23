@@ -52,8 +52,6 @@ exports.addScoreForPlayTogether = questions.addScoreForPlayTogether;
 
 exports.addMultipleQuestions = questions.addMultipleQuestions;
 
-exports.getSingleScoreById = questions.getSingleScoreById;
-
 //challange related 
 
 exports.addChallange = challenges.addChallange;
