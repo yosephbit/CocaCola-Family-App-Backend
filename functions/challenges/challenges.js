@@ -244,11 +244,11 @@ exports.upload = functions.https.onRequest(async (req, res) => {
     }
 })
 async function createSmsBodyHelper(challangeInstanceId, challangerName) {
-    var body = "Your "+ challangerName + " has prepared your trivial quiz. Go to "
+    var body = "Your "+ challangerName + " has completed the Trivia Challenge. Go to "
     var link = FORNT_END_URL + "?challenge=" + challangeInstanceId
 
     link = await TinyURL.shorten(link)
-    body = body + link + " to complete the challenge!";
+    body = body + link + " to complete the Challenge and see if you get the same answers!";
     return body;
 }
 
