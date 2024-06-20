@@ -1,8 +1,8 @@
 const dotenv=require('dotenv').config();
 const logger = require('./Logger')
 
-TWILIO_ACCOUNT_SID="AC4be07e5b99c8e3dc5b809da304ff4e53"
-TWILIO_AUTH_TOKEN="fcfde5df4be97013f2642c60639d029f"
+TWILIO_ACCOUNT_SID="Yor Account ID"
+TWILIO_AUTH_TOKEN="Your Account Token"
 TWILIO_PHONE="+12566855168"
 TWILIO_MID="MG992c25732c71ce4c8ffb8a023690e0b3"
 FORNT_END_URL="https://coke-cny.netlify.app"
